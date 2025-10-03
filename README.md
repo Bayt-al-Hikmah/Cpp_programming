@@ -30,14 +30,16 @@ This 6-lecture series covers essential C++ topics progressively. Each lecture in
 - Exercises for practice.
 - References for further reading.
 
-|---|---|---|
-|Lecture|Topic|Key Concepts Covered|
-|Lecture 1|Variables and Input-Output|Variables, data types (int, float, char, etc.), user input/output with cin/cout.|
-|Lecture 2|Control Flow|Logical/comparison operators, if-else, switch-case, for/while/do-while loops.|
-|Lecture 3|Pointers and Data Structures|Pointers, dynamic memory allocation, dynamic arrays, vectors, structs, typedef.|
-|Lecture 4|Functions and Header Files|Function creation, parameters, return types, header files, scope rules.|
-|Lecture 5|Object-Oriented Programming|OOP principles, classes, objects, namespaces, error handling.|
-|Lecture 6|Advanced Data Structures and Files|Data structures, file I/O, working with bitmap and WAV files.|
+
+| Lecture   | Topic                              | Key Concepts Covered                                                             |
+| --------- | ---------------------------------- | -------------------------------------------------------------------------------- |
+| Lecture 1 | Variables and Input-Output         | Variables, data types (int, float, char, etc.), user input/output with cin/cout. |
+| Lecture 2 | Control Flow                       | Logical/comparison operators, if-else, switch-case, for/while/do-while loops.    |
+| Lecture 3 | Pointers and Data Structures       | Pointers, dynamic memory allocation, dynamic arrays, vectors, structs, typedef.  |
+| Lecture 4 | Functions and Header Files         | Function creation, parameters, return types, header files, scope rules.          |
+| Lecture 5 | Object-Oriented Programming        | OOP principles, classes, objects, namespaces, error handling.                    |
+| Lecture 6 | Advanced Data Structures and Files | Data structures, file I/O, working with bitmap and WAV files.                    |
+
 
 **Recommended Pace**: 1-2 lectures per week, with time for coding practice. Total estimated time: 20-30 hours.
 
