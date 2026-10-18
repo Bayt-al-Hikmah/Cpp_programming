@@ -1,520 +1,1162 @@
 ## Objectives:
-- Working Memory and Pointers
-- Working with Dynamic Size Array
-- Working with Enum, Structs and Typedef
-## Memory and Pointers :
-### Introduction :
-Memory is the place where our computer store all data and variables that the programs use as grid each column has it own address and inside it we can see the value we stored, C++ is powerfull cuz it let use access the memory and manipulate the values inside those grids
-to access and display memory address of any variable in C++ we use & before the variable name
-```
-#include <stdio.h>
+- Working Pointers and Reference
+- Exploring Memory Model and Working with Dynamic Memory Allocation
+- Working with Fixed Size and Dynamic Size Arrays
+- Working with Vectors
 
-int main(){
+## Pointers and Reference
+### Introduction
+When a program runs, the computer needs somewhere to store the data it works with: variables, objects, arrays, and other information. This storage is memory, and each location in memory has its own address.
+
+We can think of memory as a huge collection of numbered storage locations. Each location has an address, and that location can contain some value.
+
+For example:
+```cpp
+int A = 5;
+```
+Here, C++ asks the system to provide a memory location capable of storing an `int`. The value `5` is then stored there.
+
+C++ gives us direct access to these addresses. To obtain the address of a variable, we use the **address-of operator** `&`:
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
     int A = 5;
-    printf("A have the value %d and the adress %d \n", A, &A);
+
+    cout << "Value of A: " << A << endl;
+    cout << "Address of A: " << &A << endl;
+
     return 0;
 }
 ```
-### Pointers :
-Pointers are special variables that store the memory addresses of other variables. This allows us to indirectly manipulate the data stored at those addresses,to create a pointer in languages like C++ or C, you specify the data type of the variable you want to point to and then prefix the pointer variable name with an asterisk (\*).
+The exact address will usually be different each time the program runs.
+
+The important idea is:
+```text
+A     → value stored in the variable
+&A    → memory address where A is stored
 ```
-int *p1; // this pointer for integers
+### Pointers
+A **pointer** is a variable whose value is a memory address. Instead of storing `5` directly, a pointer can store the address of the variable containing `5`.
+
+To declare a pointer, we specify the type of data it points to and place `*` next to the pointer name:
+```cpp
+int* p1;
 ```
-after creating pointer we can assign a memory address and make it point to this case in memory like that
-```
+This means `p1` is a pointer to an `int`.
+
+We can then make it point to an existing variable by assigning it that variable's address:
+```cpp
 #include <iostream>
 using namespace std;
 
-int main(){
-	int a = 2;
-	int* p1 = &a;
-	cout << "The memory address of a is " << p1;
+int main() {
+    int a = 5;
+    int* ptr = &a;
+
+    cout << "The memory address of a is " << ptr;
+
     return 0;
 }
-
-
 ```
-to access the value of the memory case that the pointer point to we use \* before the pointer name  
-![](./attachments/pointer.png)  
-```
+
+Now the relationship looks like this:
+
+![](./attachments/pointer.png)
+
+#### Dereferencing a Pointer
+Knowing an address is useful, but often we want to access the value stored at that address.
+
+This is done using the `*` operator, called the dereference operator.
+```cpp
 #include <iostream>
 using namespace std;
 
-int main(){
-	int a = 2;
-	int *p1 = &a;
-	cout << "The memory address " << p1 << " store this value " << *p1;
+int main() {
+    int a = 2;
+    int* p1 = &a;
+
+    cout << "The memory address is " << p1 << endl;
+    cout << "The value stored there is " << *p1 << endl;
+
     return 0;
 }
 ```
-We can change the data in the case where the pointer is pointing by using ``*p1 = value``
+Here:
+```cpp
+p1
 ```
+gives us the address.
+
+While:
+```cpp
+*p1
+```
+gives us the value stored at that address.
+
+So we can think of it as:
+```text
+p1   → "Where is it?"
+*p1  → "What is stored there?"
+```
+#### Modifying Data Through a Pointer
+Dereferencing a pointer does not only allow us to read a value. If the pointer points to writable memory, we can also modify that value.
+```cpp
 #include <iostream>
 using namespace std;
 
-int main(){
-	int a = 2;
-	int *p1 = &a;
-	cout << "the value of a is " << a << endl;
-	*p1 = 10;
-	cout << "the value of a changed to " << a << endl;
+int main() {
+    int a = 2;
+    int* p1 = &a;
+
+    cout << "The value of a is " << a << endl;
+
+    *p1 = 10;
+
+    cout << "The value of a changed to " << a << endl;
+
     return 0;
 }
+```
+When we write:
+```cpp
+*p1 = 10;
+```
+we are telling the computer go to the memory location stored inside `p1` and put `10` there.
 
+Since `p1` points to `a`, the value of `a` changes .
+#### `nullptr`
+A pointer does not always have to point to an object. C++ provides `nullptr` to represent a pointer that points to nothing:
+```cpp
+int* p = nullptr;
+```
+This is safer and clearer than using values such as `0` or `NULL`.
+
+Before dereferencing a pointer, we can check whether it actually points to something:
+```cpp
+if (p != nullptr) {
+    cout << *p;
+}
+```
+Dereferencing a null pointer is invalid and leads to undefined behavior.
+#### Pointer Arithmetic
+Pointers can also participate in arithmetic.
+
+For example:
+```cpp
+int numbers[] = {10, 20, 30, 40};
+
+int* p = numbers;
+
+cout << *p << endl;
+cout << *(p + 1) << endl;
+cout << *(p + 2) << endl;
+```
+This produces:
+```text
+10
+20
+30
+```
+When we add `1` to an `int*`, the pointer moves to the **next `int`**, not simply one byte forward.
+
+Conceptually:
+```text
+p       → numbers[0]
+p + 1   → numbers[1]
+p + 2   → numbers[2]
+```
+The compiler knows the size of the pointed-to type and adjusts the address accordingly. Pointer arithmetic is therefore particularly useful when working with arrays.
+### Const with Pointers
+`const` becomes especially important when working with pointers because there are different things we can make constant.
+
+we can pointer to constant
+```cpp
+const int* p = &a;
+```
+here `p` can point to an int, but we cannot modify that int through p.
+
+For example:
+```cpp
+int a = 10;
+const int* p = &a;
+
+cout << *p;
+
+// *p = 20; // Error
+```
+However, the pointer itself can point somewhere else:
+```cpp
+int b = 20;
+
+p = &b;
+```
+We can also create constant pointer
+```cpp
+int* const p = &a;
+```
+Here `p` itself cannot be changed to point somewhere else.
+
+But the value it points to can still be modified:
+```cpp
+*p = 20;
+```
+while this is not allowed:
+```cpp
+p = &b; // Error
+```
+Finally we have  constant pointer to constant
+```cpp
+const int* const p = &a;
+```
+Now:
+- the pointer cannot point somewhere else
+- the value cannot be modified through the pointer
+
+### References
+Before going deeper into pointers, we should also understand references, because they provide another way to work with an existing object.
+
+A reference is an alias for another variable.
+```cpp
+int a = 5;
+int& ref = a;
+```
+Now `ref` refers to the same object as `a`.
+```cpp
+ref = 10;
+```
+changes `a` as well.
+
+#### Const References
+A reference can also be made `const`:
+```cpp
+int x = 10;
+const int& ref = x;
+```
+This means that **we cannot modify** `x` **through** `ref`.
+```cpp
+std::cout << ref; // 10
+
+// ref = 20;      // Error
+```
+Notice that `x` itself is not necessarily `const`. We can still modify it directly:
+```cpp
+x = 20;
+
+std::cout << ref; // 20
 ```
 
-### Dynamic Memory Allocation :
+The `const` only prevents modification **through that particular reference**.
 
-When we declare a variable, the compiler reserves a specific memory location to store its value. We can obtain the address of this memory location using a pointer.  
-However, pointers offer more than just accessing variable addresses. They enable dynamic memory allocation, which allows us to reserve memory space during program execution rather than having it fixed at compile time.  
-- The `new` keyword allocates a block of memory of the specified size and returns a pointer to the beginning of that block.
-- After the `new` keyword, we specify the data type.
+Const references are especially useful when we want to pass an object to a function **without copying it and without allowing the function to modify it**.
 
-After successfully allocating memory using `new`, we can use the allocated space just like we would use any other variable of the same data type.
-
-#### Example :
+```cpp
+void print(const std::string& name) {
+    std::cout << name;
+}
 ```
+
+Here, `name` refers directly to the original `std::string`. No copy of the string is required, and the function cannot modify the original string through `name`.
+### Reference vs Pointer
+Pointers and references can both give us indirect access to an object, but they behave differently.
+
+A pointer:
+```cpp
+int* p = &a;
+```
+stores an address and can be changed to point somewhere else:
+```cpp
+p = &b;
+```
+A reference:
+```cpp
+int& ref = a;
+```
+acts as another name for `a`. It is not normally reseated to refer to another object.
+## Memory Architecture and Dynamic Memory Allocation
+So far, we have treated memory as one large space. In reality, a running C++ program organizes its memory into different areas with different purposes.
+
+The most important ones to understand are:
+- **Stack**
+- **Heap**
+- **Static storage**
+- **Dynamic storage**
+
+The exact implementation depends on the operating system, compiler, and runtime, but the general model is useful for understanding C++.
+### The Stack
+The **stack** is commonly used for local variables and function call information.
+
+For example:
+```cpp
+int main() {
+    int a = 5;
+    int b = 10;
+}
+```
+`a` and `b` have automatic storage duration. Their lifetime is tied to the scope in which they are declared. when execution enters the scope, the objects are created, after the execution leaves the scope, their lifetimes end.
+### The Heap
+The **heap** is commonly used for dynamically allocated memory. Unlike an ordinary local variable, dynamically allocated memory can remain alive independently of the scope where it was allocated.
+
+For example:
+```cpp
+int* p = new int;
+*p = 5;
+```
+The pointer `p` itself may be a local variable, while the `int` created by `new` has dynamic storage duration.
+
+This distinction becomes important:
+```text
+Stack                         Dynamic storage
+
+p ────────────────┐
+                  │
+                  ▼
+              ┌───────┐
+              │   5   │
+              └───────┘
+```
+The pointer and the object it points to do not necessarily live in the same memory area.
+### Storage Duration and Object Lifetime
+Memory and object lifetime are closely related, but they are not exactly the same thing. An **object's lifetime** is the period during which that object exists and can be used as an object of its type.  
+
+So far, we have seen two different ways an object's storage can be managed.
+
+With **automatic storage duration**, the lifetime is controlled automatically by the scope:
+```cpp
+void function() {
+
+    int x = 10;
+
+}
+```
+`x` is created when execution reaches its declaration and its lifetime ends when execution leaves the scope.
+
+With **dynamic storage duration**, the object is created explicitly and can remain alive until we destroy it:
+```cpp
+int* p = new int(10);
+
+delete p;
+```
+Here, the dynamically allocated `int` exists independently of the scope of `p`.
+
+There is also another important kind of storage duration: static storage duration.
+#### Static Storage
+Objects with static storage duration exist for the entire lifetime of the program. They are created before or during program initialization and remain alive until the program terminates.
+
+For example:
+```cpp
+int global = 10;
+
+int main() {
+
+    cout << global;
+
+}
+```
+`global` has static storage duration. It exists from the beginning of the program until the program ends.
+
+We can also explicitly use the `static` keyword for a local variable:
+```cpp
+void counter() {
+
+    static int count = 0;
+
+    count++;
+
+    cout << count << endl;
+}
+```
+Normally, a local variable is created each time the function is called and destroyed when the function returns. But because `count` is declared as `static`, it is created only once and keeps its value between function calls.
+
+```
+counter(); // 1
+counter(); // 2
+counter(); // 3
+```
+So, as a simple mental model:
+- **Automatic storage** lifetime is tied to a scope.
+- **Dynamic storage** lifetime is controlled explicitly.
+- **Static storage** lifetime lasts for the entire program.
+
+
+### Dynamic Memory Allocation
+Pointers become powerful when we need memory whose size or lifetime is determined during program execution.
+
+Normally, when we write:
+```cpp
+int a = 5;
+```
+the object is created automatically.
+
+But C++ also allows us to explicitly request memory using the `new` operator.
+```cpp
+int* p1 = new int;
+```
+Here, `new int` dynamically creates an `int` and returns its address, that address is stored inside `p1`.
+
+We can then use the pointer to access the allocated object:
+```cpp
 #include <iostream>
 using namespace std;
 
-int main(){
-	int *p1 = new int;
-	*p1 = 5;
-	cout << "the value that p1 hold is " << *p1;
+int main() {
+    int* p1 = new int;
+
+    *p1 = 5;
+
+    cout << "The value stored is " << *p1;
+
+    delete p1;
+
     return 0;
 }
 ```
-
-### Memory Deallocation :
-After we finish using a block of memory that we have dynamically allocated (for example, using the `new` keyword), it is essential to release it back to the system.  
-Failing to do so leads to a **memory leak**. A memory leak occurs when a program allocates memory but never releases it, gradually consuming more and more of the available memory. This can eventually cause the program to crash or the system to run out of memory for other applications.  
-To prevent memory leaks, use the **`delete` keyword** to release the allocated memory when we are finished with it.
-#### Example :
+#### Initializing Dynamically Allocated Memory
+We can initialize the object directly when using `new`.
+```cpp
+int* p1 = new int(5);
 ```
+Now the dynamically allocated `int` starts with the value `5`.
+
+We can also write:
+```cpp
+int* p1 = new int();
+```
+For a value-initialized `int`, this initializes it to zero
+
+For example:
+```cpp
 #include <iostream>
 using namespace std;
 
-int main(){
-	int *p1 = new int;
-	*p1 = 5;
-	cout << "the value that p1 hold is " << *p1;
-	delete p1;
+int main() {
+    int* p1 = new int();
+
+    cout << *p1 << endl;
+
+    *p1 = 5;
+
+    cout << *p1 << endl;
+
+    delete p1;
+
     return 0;
 }
 ```
-#### Remarque :
-We can add `()` after the variable type when using `new` to allocate memory and initialize all its contents to zero.
-```
-#include <iostream>
-using namespace std;
+#### Memory Deallocation
+Every allocation with `new` must have a corresponding `delete` when we are responsible for that dynamically allocated object.
+```cpp
+int* p1 = new int(5);
 
-int main(){
-	int *p1 = new int();
-	*p1 = 5;
-	cout << "the value that p1 hold is " << *p1;
-	delete p1;
-    return 0;
-}
-```
-## Dynamic Size Array :
-### Introduction :
+cout << *p1;
 
-Arrays are variables that can store multiple values of the same data type. These values are stored consecutively in memory, however, a significant limitation of arrays is their fixed size, to overcome this limitation, we can utilize pointers and dynamic memory allocation to create dynamically sized arrays
-**To create a dynamically sized array:**
-1. **Declare a pointer** to the desired data type.
-2. **Allocate initial memory** for the array using `new`.
-3. **To resize the array**, we just need to:
-    - Copy the existing array data to a new memory location.
-    - Allocate the requested amount of memory for the resized array.
-    - Optionally, free the original memory block.
-
-This approach provides flexibility by allowing the array to grow or shrink as needed during program execution.  
-When we're finished using the array, we should release the memory it's using. This prevents memory leaks and helps our program run smoothly. We do this by using the `delete` function.
-#### Example :
+delete p1;
 ```
-#include <iostream>
-using namespace std;
+`delete` destroys the dynamically allocated object and releases its associated storage.
 
-int main(){
-	int *p1 = new int[5];
-	*(p1) = 1;
-	*(p1+1) = 5;
-	*(p1+2) = 8;
-	*(p1+3) = 9;
-	*(p1+4) = 10;
-	for(int i = 0; i<5 ; i++){
-		cout << "the value in position " << i << "  is " << *(p1 + i) << endl;
-	}
-	delete[] p1;
-    return 0;
-}
+If we allocate memory but lose the pointer without releasing the memory, that memory can no longer be accessed or reclaimed by the program, this is called a **memory leak**.
+
+For example:
+```cpp
+int* p = new int(5);
+
+p = nullptr;
 ```
-To access the first value in a dynamic array, we use the pointer itself (e.g., `*p1`) because the pointer always points to the beginning of the array.  
-To access subsequent values, we increment the pointer. This moves the pointer to the next memory address, allowing us to access the next element in the array. We repeat this process to access all the elements.  
+The allocated `int` still exists, but we have lost the address needed to access or delete it. The memory has effectively been leaked.
+### Dangling Pointers
+A dangling pointer is a pointer that still contains an address, but the object at that address no longer exists.
+
+For example:
+```cpp
+int* p = new int(5);
+
+delete p;
+
+cout << *p; // Dangerous
+```
+After:
+```cpp
+delete p;
+```
+the object no longer exists, the pointer `p` still contains the old address, but that address is no longer a valid `int` object that we can access.
+
+A common defensive practice is:
+```cpp
+delete p;
+p = nullptr;
+```
+Now the pointer clearly represents that it no longer points to a valid object.
+### Double Deletion
+Another serious mistake is deleting the same dynamically allocated object more than once:
+```cpp
+int* p = new int(5);
+
+delete p;
+delete p; // Error
+```
+The first `delete` releases the object. the second attempts to release it again, which results in **undefined behavior**.
+
+Setting the pointer to `nullptr` after deletion can help prevent this:
+```cpp
+delete p;
+p = nullptr;
+
+delete p; // safe: deleting nullptr has no effect
+```
+
+## Working with Arrays
+
+### Introduction
+So far, we have seen how variables store individual values and how pointers allow us to work with memory addresses.
+
+But what happens when we want to store **multiple values of the same type**? For example, imagine that we want to store the grades of five students:
+```cpp
+int grade1 = 15;
+int grade2 = 18;
+int grade3 = 12;
+int grade4 = 16;
+int grade5 = 14;
+```
+This works, but it quickly becomes inconvenient. Instead, C++ provides **arrays**.
+
+An array is a variable that can store multiple values of the same data type. These values are stored **consecutively in memory**.
+
+We can create an array like this:
+```cpp
+int grades[5];
+```
+This creates an array capable of storing five `int` values.
+
+We can then access each element using an index:
+```cpp
+grades[0] = 15;
+grades[1] = 18;
+grades[2] = 12;
+grades[3] = 16;
+grades[4] = 14;
+```
+Notice that the first element has index `0`, not `1`.
+
+<img src="./attachments/array.png"/>
+
+The elements are stored next to each other in memory.
+
+### Fixed-Size Arrays
+The array we created above has a fixed size:
+```cpp
+int grades[5];
+```
+The number `5` tells C++ that this array contains five elements. the  limitation here is that the size of this array does not change.
+
+If we create:
+```cpp
+int numbers[5];
+```
+we cannot simply make it:
+```cpp
+int numbers[10];
+```
+later.
+### Arrays and Pointers
+Because array elements are stored consecutively in memory, we can navigate through an array using a pointer.
+
+Consider:
+```cpp
+int numbers[5] = {10, 20, 30, 40, 50};
+```
+The array might look conceptually like this:
+
+<img src="./attachments/array_ptr.jpeg"/>
+
+We can create a pointer to the first element:
+```cpp
+int* p = numbers;
+```
+Here, `numbers` is converted to a pointer to its first element, this is called array-to-pointer decay.
+
+In many expressions:
+```cpp
+numbers
+```
+behaves like:
+```cpp
+&numbers[0]
+```
+So:
+```cpp
+int* p = numbers;
+```
+is effectively pointing to the first element.
+
+We can then access the elements using pointer arithmetic:
+```cpp
+cout << *p << endl;
+cout << *(p + 1) << endl;
+cout << *(p + 2) << endl;
+```
+### Multidimensional Arrays
+Arrays can also contain other arrays. This allows us to create multidimensional arrays.
+
+A common example is a 2D array, which can represent a table with rows and columns.
+```cpp
+int table[3][2] = {
+    {1, 2},
+    {3, 4},
+    {5, 6}
+};
+```
+We can visualize it like this:
+
+<img src="./attachments/table.png" />
+
+To access an element, we use two indexes, the first index specifies the row and second index specifies the column.
+```cpp
+table[0][1]
+```
+means  Row `0`, column `1`.
+### Dynamic-Sized Arrays
+Fixed-size arrays are useful, but sometimes we do not know the required size when writing the program.
+
+Imagine that a program asks the user how many numbers they want to store, we cannot always know that number beforehand.
+
+This is where **dynamic memory allocation** becomes useful.
+
+Instead of creating the array directly:
+```cpp
+int numbers[5];
+```
+we can allocate memory during program execution:
+```cpp
+int* ptr = new int[5];
+```
+Here:
+- `new` allocates memory.
+- `int[5]` requests space for five integers.
+- `new` returns the address of the first element.
+- `numbers` stores that address.
+
+To access the first value, we use:
+```cpp
+*ptr
+```
+
+because `ptr` points to the beginning of the allocated array.
+
+To access the next value:
+```cpp
+*(ptr + 1)
+```
+Then:
+```cpp
+*(ptr + 2)
+```
+and so on.
+
 ![](./attachments/d_array.png)
-#### Example :
+
+We can also access value like a normal array:
+```cpp
+ptr[0] = 10;
+ptr[1] = 20;
+ptr[2] = 30;
 ```
+#### Resizing a Dynamic Array
+What if we initially allocate space for five elements, but later discover that we need ten?
+
+We cannot simply change:
+```cpp
+new int[5]
+```
+into:
+```cpp
+new int[10]
+```
+The existing memory block has a fixed size, instead, we need to allocate a new, larger block of memory and copy the old data into it.
+
+The general process is:
+1. Allocate a new block with the requested size.
+2. Copy the existing elements into the new block.
+3. Release the old block.
+4. Make the original pointer point to the new block.
+5. Continue using the new array.
+    
+
+For example:
+```cpp
 #include <iostream>
 using namespace std;
 
-int main(){
-	int *p1 = new int[5];
-	int *tmp;
-	*(p1) = 1;
-	*(p1+1) = 2;
-	*(p1+2) = 3;
-	*(p1+3) = 4;
-	*(p1+4) = 5;
-	tmp = new int[10];
-	for(int i = 0; i < 5; i++){
-	  *(tmp + i)  = *(p1 + i)  ;
-	}
-	delete[] p1;
-	p1 = tmp;
-	*(p1+5) = 6;
-	*(p1+6) = 7;
-	*(p1+7) = 8;
-	*(p1+8) = 9;
-	*(p1+9) = 10;
-	for(int i = 0; i < 10; i++){
-		cout << "the value in position " << i << " is "<< *(p1 + i)<<endl;
-	}
-	delete[] p1;
-    return 0;
-}
-```
-### Strings :
-Strings are essentially arrays of characters. A key characteristic of strings is that they always end with the null character ``'\0'``.  
-To create dynamically sized strings, we use a character pointer ``char *``.
-#### Example : 
-```
-#include <iostream>
-using namespace std;
+int main() {
 
-int main(){
-	char *name = new char[4];
-	*(name) = 'A';
-	*(name+1) = 'l';
-	*(name+2) = 'i';
-	*(name+3) = '\0';
-	cout << "my name is " << name << endl;
-	delete[] name;
-    return 0;
-}
-```
-The last character in a string is always the null character ('\0'). This null character signals the end of the string to the compiler.  
-Just like with arrays of other data types, we can change the size of dynamically allocated memory for strings.
-#### Example :
-```
-#include <iostream>
-using namespace std;
+    int* p1 = new int[5];
 
-int main(){
-	char *name = new char[4];
-	char *tmp;
-	*(name) = 'A';
-	*(name+1) = 'l';
-	*(name+2) = 'i';
-	*(name+3) = '\0';
-	cout << "my name is " << name << endl;
-	tmp = new char[6];
-	for(int i=0;i<4;i++){
-	    *(tmp + i) = *(name + i);
-	}
-	delete[] name;
-	name = tmp;
-	*(name+3) = 'c';
-	*(name+4) = 'e';
-	*(name+5) = '\0';
-	cout << "my name is " << name << endl;
-	delete[] name;
+    *(p1)     = 1;
+    *(p1 + 1) = 2;
+    *(p1 + 2) = 3;
+    *(p1 + 3) = 4;
+    *(p1 + 4) = 5;
+    
+    // create new array
+    int* tmp = new int[10];
+    
+    // copy element to new array
+    for (int i = 0; i < 5; i++) {
+        *(tmp + i) = *(p1 + i);
+    }
+    
+    // delete old array
+    delete[] p1;
+    
+    // make pointer point to new array
+    p1 = tmp;
+
+    *(p1 + 5) = 6;
+    *(p1 + 6) = 7;
+    *(p1 + 7) = 8;
+    *(p1 + 8) = 9;
+    *(p1 + 9) = 10;
+
+    for (int i = 0; i < 10; i++) {
+        cout << "The value in position "
+             << i << " is "
+             << *(p1 + i) << endl;
+    }
+
+    delete[] p1;
+
     return 0;
 }
 ```
-We can simplify working with strings by including the string header. It contains the `string` type, allowing us to declare variables of that type and work with them without the complexities of allocating memory and using pointers.
+The important part is:
+```cpp
+int* tmp = new int[10];
 ```
+We create a new memory block.
+
+Then:
+```cpp
+for (int i = 0; i < 5; i++) {
+    *(tmp + i) = *(p1 + i);
+}
+```
+copies the old values.
+
+Then:
+```cpp
+delete[] p1;
+p1 = tmp;
+```
+releases the old memory and makes `p1` point to the new block, after the old array is released we can then fill the new positions.
+#### Array Memory Deallocation
+Every dynamically allocated array must be freed when it is no longer needed.
+
+When we allocate an array using `new[]`:
+```cpp
+int* p1 = new int[10];
+```
+we must release it using `delete[]`:
+```cpp
+delete[] p1;
+```
+Notice the `[]` after `delete`. It tells C++ that `p1` points to an array and that the entire array should be deallocated.
+### Dynamic-Sized 2D Arrays
+We have seen how to create a fixed-size 2D array:
+```cpp
+int table[4][3];
+```
+But what if the number of rows or columns is not known beforehand?
+
+We can combine pointers and dynamic memory allocation to create a dynamically allocated 2D structure. One common approach is to create an array of pointers.
+
+For example:
+```cpp
+int** ptr = new int*[4];
+```
+Here:
+```cpp
+int**
+```
+means that `ptr` is a pointer to a pointer that point to an `int`.
+
+The first allocation creates four pointers, Each pointer can then point to its own dynamically allocated array.
+
+For example:
+```cpp
+*(ptr) = new int[4];
+*(ptr + 1) = new int[4];
+*(ptr + 2) = new int[4];
+*(ptr + 3) = new int[4];
+```
+Now we effectively have:
+
+![](./attachments/image1.png)
+
+Each row is its own dynamically allocated array, which means the rows do not necessarily have to have the same size.
+
+To access element we use doube deferencing
+```cpp
+*(*(ptr) + 1) = 2; // row 1 column 2
+```
+#### Multidimensional Dynamic Arrays
+We are not limited to two dimensions, the same idea can be extended to more dimensions by adding more levels of pointers.
+
+For example:
+```cpp
+int*** ptr;
+```
+could be used to build a dynamically allocated 3D structure. However, the more levels of pointers we introduce, the more complicated memory management becomes.
+### Strings
+We saw before in lecture one strings, strings are essentially a sequence of characters stored in a character array and terminated by a special character called the **null character** `\0`:
+
+```cpp
+char name[4] = {'A', 'l', 'i', '\0'};
+```
+The null character tells C string functions where the string ends.
+#### Dynamically Allocated C Strings
+Since a C string is a character array, we can dynamically allocate one using a `char*`.
+
+For example:
+```cpp
+char* name = new char[4];
+*(name)     = 'A';
+*(name + 1) = 'l';
+*(name + 2) = 'i';
+*(name + 3) = '\0';
+cout << "My name is " << name << endl;
+```
+The memory looks like:
+```text
+name
+ ↓
+┌─────┬─────┬─────┬─────┐
+│ 'A' │ 'l' │ 'i' │ '\0'│
+└─────┴─────┴─────┴─────┘
+```
+We can also resize string and do all dynamic array operation on them we can aslo have array of string by using the double pointer methods
+```cpp
+char** names = (char**)malloc(3*sizeof(char*)) ;
+    *(names) = (char*)malloc(sizeof(char)*4);
+    *(names+1) = (char*)malloc(sizeof(char)*6);
+    *(names+2) = (char*)malloc(sizeof(char)*6);
+    **(names)='A';
+    *(*(names)+1)='l';
+    *(*(names)+2)='i';
+    *(*(names)+3)='\0';
+
+    cout << *(names);
+```
+#### `std::string`
+Managing character arrays manually requires allocating memory, copying characters, resizing arrays, and handling the null terminator `'\0'`.  C++ provides `std::string` to handle these details automatically.
+
+We include it using:
+```cpp
+#include <string>
+```
+For example:
+```cpp
 #include <iostream>
 #include <string>
+
 using namespace std;
 
-int main(){
-	string name = "ali";
-	cout << name << endl;
-	name = "Alice";
-	cout << name;
+int main() {
+    string name = "Ali";
+    cout << name << endl;
+    name = "Alice";
+    cout << name << endl;
     return 0;
 }
 ```
-### 2D Arrays
+Unlike C-style strings, `std::string` manages its own memory and can change its size automatically.
 
-Arrays are variables that can hold multiple values of the same data type. A particularly interesting aspect is that arrays can hold other arrays as elements, enabling the creation of 2D arrays (which can represent tables). We can create both fixed-sized 2D arrays and dynamically sized 2D arrays.
-#### Fixed-Sized 2D Array :
- 
-Fixed-sized 2D arrays are useful when we store our data in a tabular format. We create them by first choosing the type of values we want to store inside our variable, then setting the size of the rows and columns. Finally, we create a main array and, instead of inserting individual values, we insert arrays within it.
+We can create strings in several ways:
+```cpp
+string first = "Ali";       // Initialize with text
+string second;              // Empty string
+second = "Alice";           // Assign a value
+string stars(5, '*');       // "*****"
+string copy = first;        // Copy another string
 ```
-int table[3][2] = {{1, 2}, {3, 4}, {5, 6}};
-```
-#### Remarque :
+We can modify individual characters using their indices, append text using `+=`, or combine strings using `+`.
+```cpp
+string name = "Ali";
 
-- The main problem with this kind of array is that all the arrays inside it need to have the same size.
-- To access an element in a 2D array, we use double indexing. The first index specifies the row, and the second index specifies the column
-#### Examples :
+name[0] = 'A';
+name += " Anunnaki";
+
+string greeting = "Hello " + name;
+
+cout << greeting << endl;
 ```
+Output:
+```
+Hello Ali Anunnaki
+```
+We can also use the `find()` function to search and returns the starting position of the first occurrence of the specified text. If it is not found, it returns `string::npos`.
+```cüü
+string text = "Hello World";
+
+size_t position = text.find("World");
+
+if (position != string::npos) {
+    cout << "Found at position " << position;
+}
+```
+We can extract part of a string using `substr()` and get its length using `size()`.
+```cpp
+string text = "Hello World";
+
+cout << text.substr(6, 5) << endl;  // World
+cout << text.size() << endl;        // 11
+```
+`substr(start, count)` extracts `count` characters beginning at `start`, while `size()` returns the number of characters in the string.
+#### `std::string_view`
+Sometimes, we only need to read a string without copying it. C++ provides `std::string_view` for this purpose.
+
+We include it using:
+```
+#include <string_view>
+```
+For example:
+```cpp
 #include <iostream>
+#include <string>
+#include <string_view>
+
 using namespace std;
 
-int main(){
-	int table[4][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}};
-	for(int i = 0 ; i < 4; i++){
-		for(int j = 0; j < 3; j++){
-			cout << table[i][j] << " ";
-		}
-		cout << endl;
-	}
+void print(string_view text) {
+    cout << text << endl;
+}
+
+int main() {
+    string name = "Alice";
+
+    print(name);
+
     return 0;
 }
 ```
-#### Dynamic-Sized 2D Array :
-C++ provides a way to dynamically allocate memory and store the address of this memory using pointers. This enables us to create arrays that can grow and shrink in size.  
-Furthermore, we can use multiple pointers to point to different blocks of memory. We can then store these pointers in an array, creating an "array of pointers." This results in a pointer that points to an array of pointers, where each pointer within that array points to a block of memory that can represent an array to store our data.  
-Effectively, we have created a 2D dynamically allocated array.  
-![](./attachments/image1.png)  
+Here, `string_view` allows the function to access the existing characters without creating another `std::string` copy.
 
-#### Example :
-```
-#include <iostream>
-using namespace std;
+## Vectors
+So far, we have seen how arrays allow us to store multiple values of the same type in consecutive memory locations. We have also seen how dynamic arrays allow us to allocate memory during program execution.
 
-int main(){
-    int **ptr = new int*[4];
-    *(ptr) = new int[3];
-    *(*ptr) = 1;
-    *(*ptr + 1) = 2;
-    *(*ptr + 2) = 3;
-    *(ptr + 1) = new int[3];
-    *(*(ptr + 1)) = 4;
-    *(*(ptr + 1) + 1) = 5;
-    *(*(ptr + 1) + 2) = 6;
-    *(ptr + 2) = new int[3];
-    *(*(ptr + 2)) = 7;
-    *(*(ptr + 2) + 1) = 8;
-    *(*(ptr + 2) + 2) = 9;
-    *(ptr + 3) = new int[3];
-    *(*(ptr + 3)) = 10;
-    *(*(ptr + 3) + 1) = 11;
-    *(*(ptr + 3) + 2) = 12;
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 3; j++){
-            cout << *(*(ptr + i) + j) << " ";
-        }
-        cout << endl;
-    }
-    for(int i = 0; i < 4; i++){
-        delete[] *(ptr + i);
-    }
-    delete[] ptr;
-    return 0;
-}
+However, working with dynamically allocated arrays requires us to manage memory manually. We need to allocate memory, keep track of the array's size, copy elements when resizing, and release the memory when we no longer need it.
 
-```
-#### Remarque :
-- We can apply the same concept to characters. We can create an array of strings, such as an array of names.
-- We are not limited to only 2D arrays. This method can be extended to create multidimensional arrays.
-### Vectors :
+C++ provides a container called **`std::vector`** that handles these operations for us.
 
-C++ provides another approach to working with dynamically sized arrays: **vectors**. Vectors are built-in dynamic arrays that come with functionalities to add and remove elements, and they automatically handle memory allocation, reallocation, and deallocation.  
-To use vectors, you first need to include the vector header ``#include <vector>``  
-Then, we can create a vector variable as follows
-`vector<string> names = {"Ali", "Amine", "Alice", "Engy"};`
-We can access elements within the vector using the index method ``names[0] `` Represents "Ali"  
-The key strength of vectors lies in the provided functions that simplify data manipulation:
-- **`names.front()`:** Gets the first element.
-- **`names.back()`:** Gets the last element.
-- **`names.push_back("Omar")`:** Adds an element to the end of the vector.
-- **`names.pop_back()`:** Removes the last element from the vector.
-- **`names.size()`:** Returns the size of the vector.
-#### Example :
-```
+A `std::vector` is a dynamic array that can automatically grow or shrink as we add or remove elements. Unlike a C-style array, we do not need to decide its final size when we declare it.
+
+To use `std::vector`, we include the `<vector>` header:
+```cpp
 #include <iostream>
 #include <vector>
-#include <string>
+
 using namespace std;
 
-int main(){
-    vector<string> names = {"Ali", "Amine", "Alice", "Engy"};
-    cout << names.front() << endl;
-    cout << names.back() << endl;
-    names.push_back("Omar");
-    cout << names.back() << endl;
-    names.pop_back();
-    names.pop_back();
-    cout << names.back() << endl;
-    return 0;
-}
-```
-## Enum, Structs and Typedef :
-### Enum :
-An enum is used to represent a variable that can hold a predefined set of possible values, such as the state of a coin (e.g., "heads" or "tails"), a playing card, or the faces of a dice. To define an enum, it should first be created in the function or constant section of your code. Each possible value in the enum can either be empty or hold an associated number.
-```
-enum Coin{
-  Head,
-  Tails
-}
-enum Dice {
-  One = 1,
-  Two = 2,
-  Tree = 3,
-  Four = 4,
-  Five = 5,
-  Six = 6
-};
-```
-We use the enum that we created by creating a variable using the `enum` keyword, followed by the name of the enum we want to use. Then, we define the variable name and assign it a value, which must be one of the predefined possibilities within the enum.
+int main() {
+    vector<int> numbers = {10, 20, 30, 40, 50};
 
-```
-#include <iostream>
-using namespace std;
-
-enum Dice {
-  One = 1,
-  Two = 2,
-  Tree = 3,
-  Four = 4,
-  Five = 5,
-  Six = 6
-};
-
-int main(){
-    enum Dice result = One;
-    cout << result << endl;
-    return 0;
-}
-
-```
-Enums are useful when working with switch-case statements because they ensure that the variable has a limited set of possible values.
-#### Example :
-```
-#include <iostream>
-using namespace std;
-
-enum Dice {
-  One = 1,
-  Two = 2,
-  Three = 3,
-  Four = 4,
-  Five = 5,
-  Six = 6
-};
-
-int main(){
-    enum Dice result = Six;
-    switch(result){
-        case One:
-        case Two:
-        case Three:
-        case Four:
-        case Five:
-            cout << "You lost :(" << endl;
-            break;
-        case Six:
-            cout << "You won !" << endl;
-	        break;
+    for (int i = 0; i < numbers.size(); i++) {
+        cout << numbers[i] << endl;
     }
-    return 0;
-}
 
-```
-### Struct :
-Sometimes we want to represent more complex variables than just numbers and characters, such as real-world objects like students or cars. C++ allows us to do this using structures.  
-With structures, we can create variables that hold other variables of different data types within them. For example, we can create a `struct Student` that contains members for the student's name (as a character array) and age (as an integer).  
-To use a struct, we first need to define it. This is typically done outside of any function, similar to how we define enums. Inside the structure definition (within the curly braces `{}`), we declare the variables that the struct will hold.  
-Inside a struct, we can include variables of any type, such as arrays, numbers, enums, or even other structs.
-```
-struct Student {
-char name[10];
-int age;
-}
-```
-We use a struct by creating a variable with the `struct` keyword, followed by the name of the struct we want to use. After defining the variable name, we can access the properties of the struct using dot (`.`) notation.
-```
-#include <iostream>
-#include <string>
-using namespace std;
-
-struct Student {
-int age;
-string name;
-};
-
-int main(){
-    struct Student student1;
-    student1.age = 23;
-    student1.name = "Ali";
-    cout << "The student name is " << student1.name << " the student age is "<< student1.age << endl;
     return 0;
 }
 ```
-We can create a pointer for a structure and allocate it dynamically, just as we do with other data types. However, when accessing the properties of the struct through the pointer, we use the arrow notation (`->`).
+Here:
 ```
-#include <iostream>
-#include <string>
-using namespace std;
+vector<int> numbers = {10, 20, 30, 40, 50};
+```
+creates a vector named `numbers` that stores five integers.
 
-struct Student {
-int age;
-string name;
-};
+The `int` inside the angle brackets specifies the type of elements the vector stores. We can create vectors of other types, such as `double`, `char`, or `string`.
+```cpp
+vector<int> numbers;
+vector<double> prices;
+vector<char> letters;
+vector<string> names;
+```
+Unlike a fixed-size array, we can add more elements to a vector whenever we need them.
+### Adding Elements to a Vector
+When we create a vector, we do not need to specify how many elements it will eventually contain.
 
-int main(){
-    struct Student* student1 = new struct Student;
-    student1->age = 23;
-    student1->name = "Ali";
-    cout << "The student name is " << student1->name << " the student age is " << student1->age << endl;
-    delete student1;
-    return 0;
+For example:
+```cpp
+vector<int> numbers;
+```
+This creates an empty vector of integers.
+
+We can add elements using the `push_back()` function:
+```cpp
+numbers.push_back(10);
+numbers.push_back(20);
+numbers.push_back(30);
+```
+Each call adds a new element to the end of the vector.
+### Accessing and Modifying Elements
+Just like ordinary arrays, vectors use indexes to access their elements. The first element has index `0`, the second has index `1`, and so on.
+```cpp
+vector<int> numbers = {10, 20, 30, 40};
+
+cout << numbers[0] << endl; // 10
+cout << numbers[1] << endl; // 20
+```
+We can also modify an element by assigning a new value to its index:
+```
+numbers[1] = 100;
+```
+Now the vector contains:
+```
+10  100  30  40
+```
+However, we must remember that indexes still have limits. Accessing an element outside the vector's valid range using `operator[]` results in undefined behavior.
+
+If we want bounds-checked access, we can use the `at()` function:
+```
+cout << numbers.at(1); // 100
+```
+If the index is outside the valid range, `at()` throws a `std::out_of_range` exception.
+### Getting the Size of a Vector
+When working with arrays, we often need to know how many elements they contain. With a vector, we can use the `size()` function.
+```cpp
+vector<int> numbers = {10, 20, 30, 40, 50};
+
+cout << numbers.size(); // 5
+```
+### Removing Elements
+Just as we can add elements, we can also remove them. The `pop_back()` function removes the last element of the vector.
+```cpp
+vector<int> numbers = {10, 20, 30, 40};
+
+numbers.pop_back();
+```
+Now the vector contains:
+```
+10  20  30
+```
+We can also remove all elements using `clear()`:
+```
+numbers.clear();
+```
+After this operation, the vector's size becomes zero.
+
+It is important to understand that clearing a vector does not necessarily release all the memory it has allocated. 
+### Resizing a Vector
+Earlier, when working with dynamic arrays, we saw that increasing their size required allocating a new memory block, copying the existing elements, and releasing the old memory.
+
+With `std::vector`, we can use the `resize()` function to change the number of elements.
+```cpp
+vector<int> numbers = {10, 20, 30};
+
+numbers.resize(5);
+```
+The vector now contains five elements:
+```
+10  20  30  0  0
+```
+The new elements are value-initialized, which means they are initialized to zero in this case.
+
+We can also shrink the vector:
+```
+numbers.resize(2);
+```
+Now it contains only:
+```
+10  20
+```
+The vector handles the necessary operations internally.
+
+However, resizing does not guarantee that the vector's allocated memory will shrink when its size decreases. The number of elements and the amount of allocated storage are two different concepts.
+#### Size vs Capacity
+To understand how vectors manage memory, we need to distinguish between two concepts: **size** and **capacity**.
+
+The **size** is the number of elements currently stored in the vector.
+
+The **capacity** is the number of elements the vector can hold in its currently allocated storage without needing to reallocate that storage.
+
+For example:
+```cpp
+vector<int> numbers = {10, 20, 30};
+
+cout << "Size: " << numbers.size() << endl;
+cout << "Capacity: " << numbers.capacity() << endl;
+```
+The size is `3`, but the capacity may be greater than `3`.
+
+The exact capacity depends on how the vector manages its memory, so we should not assume a particular value.
+
+Conceptually, the memory might look like this:
+
+```
+Allocated storage
+┌──────┬──────┬──────┬──────┬──────┐
+│  10  │  20  │  30  │      │      │
+└──────┴──────┴──────┴──────┴──────┘
+└──────────┘  └───────────────────┘
+  Size = 3          Extra capacity
+```
+When we add elements using `push_back()`, the vector can use its existing capacity if there is enough room.
+
+When the available capacity is insufficient, the vector may allocate a larger memory block and move or copy its elements into the new storage.
+
+### Iterating Through a Vector
+We have already seen how to access vector elements using indexes. However, C++ provides another convenient way to iterate through a vector: the range-based `for` loop.
+```cpp
+vector<int> numbers = {10, 20, 30, 40, 50};
+
+for (int number : numbers) {
+    cout << number << endl;
 }
-
 ```
-### Typedef
-C++ provides a way to create custom data types using the `typedef` keyword. To define a new type, we start by using the `typedef` keyword, followed by `struct`. Inside the curly braces `{}`, we specify the variables that the struct will hold. After the closing brace `}`, we add the name of the new type we are creating.by convention, type definitions use uppercase letters to show they are symbolic abbreviations, but lowercase can also be used.  
-Once the new type is defined, we can create variables of this type by using the new type name, followed by the variable name.
-```
-#include <iostream>
-#include <string>
-using namespace std;
+For each iteration, `number` receives a copy of the current element.
 
-typedef struct {
-int age;
-string name;
-} Student;
-
-int main(){
-    Student student1;
-    student1.age = 23;
-    student1.name = "Ali";
-    cout << "The student name is " << student1.name << " the student age is " << student1.age << endl;
-    return 0;
+If we want to modify the original elements, we can use a reference:
+```cpp
+for (int& number : numbers) {
+    number *= 2;
 }
 ```
-In modern C++, the `using` keyword is preferred over `typedef` for creating new types. This leads to more concise and readable code
-```
-#include <iostream>
-#include <string>
-using namespace std;
+Now each element is multiplied by two.
 
-using Student = struct {
-int age;
-string name;
-} ;
-
-int main(){
-    Student student1;
-    student1.age = 23;
-    student1.name = "Ali";
-    cout << "The student name is " << student1.name << " the student age is " << student1.age << endl;
-    return 0;
+We can also use a reference to avoid copying an element when we only need to read it:
+```cpp
+for (const int& number : numbers) {
+    cout << number << endl;
 }
 ```
+For simple types such as `int`, copying is inexpensive, so using a reference is not always necessary. For larger objects, references can avoid unnecessary copies.
+
+### Vectors and Pointers
+Since vectors store their elements in contiguous memory, we can also work with their elements using pointers.
+
+Consider:
+```cüü
+vector<int> numbers = {10, 20, 30, 40, 50};
+
+int* ptr = numbers.data();
+```
+The `data()` function returns a pointer to the vector's element storage.
+
+We can then access the elements using pointer arithmetic:
+```cpp
+cout << *ptr << endl;       // 10
+cout << *(ptr + 1) << endl; // 20
+cout << *(ptr + 2) << endl; // 30
+```
+This is similar to what we did with C-style arrays.
+
+We can also modify elements through the pointer:
+```
+*ptr = 100;
+```
+Now the first element of the vector is `100`.
+
+However, we must be careful when working with pointers to vector elements. Some vector operations, such as those that cause reallocation, can invalidate pointers, references, and iterators referring to its elements.
+
+For example, adding elements may cause the vector to allocate a new memory block. If that happens, a pointer obtained from `data()` may no longer be valid.
 ## Tasks :
 ### Task 1 :
 
@@ -534,14 +1176,3 @@ Write a program that asks the user for the number of subjects they have, and for
 3. Display the subject number, the marks for each test in that subject, and the average for that subject.
 
 Finally, the program should display the overall total average across all subjects.
-### Task3 :
-
-Write a program in C++ to represent a small library. The library should be represented as an vector of books, where each book has the following details:
-
-- Title (string)
-- Author (string)
-- Number of pages (integer)
-
-The program should ask the user how many books they have. Afterward, the user should input the details of each book (title, author, number of pages). Once the details are entered and stored, the program should display the list of books along with their details.
-#### Hint :
-You need to create a new type using `typedef` or `using` to represent the books.

@@ -1,63 +1,86 @@
 #include <iostream>
 #include <string>
-
 using namespace std;
 
-class Bank{
-    private :
-    int account_number;
-    string account_holder_name;
-    float account_balance;
-    public :
-    Bank (int id, string name, float balance){
-        account_number = id;
-        account_holder_name = name;
-        account_balance = balance;
-    }
-    void deposit(float amount){
-        if(amount > 0){
-           account_balance += amount ; 
-           cout << account_holder_name  << " account new balance is " << account_balance << endl;
+class BankAccount {
+private:
+    string accountNumber;
+    string accountHolder;
+    double balance;
 
-        }else{
-            cout << "amount can't be negative" << endl;
+public:
+    BankAccount(string number, string holder, double initialBalance) {
+        accountNumber = number;
+        accountHolder = holder;
+        balance = initialBalance;
+    }
+
+    string getAccountNumber() const {
+        return accountNumber;
+    }
+
+    string getAccountHolder() const {
+        return accountHolder;
+    }
+
+    double getBalance() const {
+        return balance;
+    }
+
+    void setAccountHolder(string accountHolder) {
+        this->accountHolder = accountHolder;
+    }
+
+    void deposit(double amount) {
+        balance += amount;
+    }
+
+    void withdraw(double amount) {
+        if (amount <= balance) {
+            balance -= amount;
+        } else {
+            cout << "Insufficient balance." << endl;
         }
     }
-    void withdraw(float amount){
-        if(amount > 0){
-           account_balance -= amount ; 
-           cout << account_holder_name  << " account new balance is " << account_balance << endl;
 
-        }else{
-            cout << "amount can't be negative" << endl;
+    void transfer(BankAccount &destination, double amount) {
+        if (amount <= balance) {
+            balance -= amount;
+            destination.balance += amount;
+        } else {
+            cout << "Insufficient balance for transfer." << endl;
         }
     }
-    float get_balance(){
-        return account_balance;
-    }
-    void transfer(Bank &other,float amount){
-        if(amount > 0){
-           other.deposit(amount);
-           this->withdraw(amount);
 
-        }else{
-            cout << "amount can't be negative" << endl;
-        }
+    void display() const {
+        cout << "Account Number: " << accountNumber << endl;
+        cout << "Account Holder: " << accountHolder << endl;
+        cout << "Balance: " << balance << endl;
     }
-    void display_info(){
-        cout << "========================================" << endl;
-        cout << "Account Number: " << account_number << endl;
-        cout << "Account Holder: " << account_holder_name << endl;
-        cout << "Balance: " << account_balance << endl;
-    }
-
-
 };
-int main(){
-    Bank  account1(1,"Ali",700);
-    Bank  account2(1,"Cat",1200);
-    account1.transfer(account2,500);
-    account1.display_info();
-    account2.display_info();
+
+int main() {
+    BankAccount account1("ACC001", "Ali", 1000);
+    BankAccount account2("ACC002", "Sara", 500);
+
+    cout << "Initial accounts:" << endl;
+
+    account1.display();
+    cout << endl;
+
+    account2.display();
+    cout << endl;
+
+    account1.deposit(200);
+    account1.withdraw(100);
+    account1.transfer(account2, 300);
+
+    cout << "After transactions:" << endl;
+
+    account1.display();
+    cout << endl;
+
+    account2.display();
+
     return 0;
 }

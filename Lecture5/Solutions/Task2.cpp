@@ -1,59 +1,107 @@
 #include <iostream>
 #include <cmath>
 using namespace std;
-class Complex{
-    public :
-    float imaginary,real;
-    Complex(float re,float im){
-        real = re;
-        imaginary = im;
+
+class Complex {
+private:
+    double real;
+    double imaginary;
+
+public:
+    Complex(double r = 0, double i = 0) {
+        real = r;
+        imaginary = i;
     }
-    Complex operator+(Complex &other){
-        float im = imaginary + other.imaginary;
-        float re = real + other.real;
-        Complex result(re, im);
-        return result;
+
+    double getReal() const {
+        return real;
     }
-    Complex operator-(Complex &other){
-        float im = imaginary - other.imaginary;
-        float re = real - other.real;
-        Complex result(re, im);
-        return result;
+
+    double getImaginary() const {
+        return imaginary;
     }
-    Complex operator*(Complex &other){
-        float im = imaginary * other.real + real * other.imaginary;
-        float re = real * other.real - imaginary * other.imaginary;
-        Complex result(re, im);
-        return result;
+
+    Complex operator+(const Complex &other) const {
+        return Complex(
+            real + other.real,
+            imaginary + other.imaginary
+        );
     }
-    Complex operator/(Complex &other){
-        float im = (imaginary * other.real - real * other.imaginary)/(other.real * other.real + other.imaginary * other.imaginary);
-        float re = (real * other.real + imaginary * other.imaginary)/(other.real * other.real + other.imaginary * other.imaginary);
-        Complex result(re, im);
-        return result;
+
+    Complex operator-(const Complex &other) const {
+        return Complex(
+            real - other.real,
+            imaginary - other.imaginary
+        );
     }
-    bool operator==(Complex &other){
-        return imaginary == other.imaginary && real == other.real;
+
+    Complex operator*(const Complex &other) const {
+        return Complex(
+            real * other.real - imaginary * other.imaginary,
+            real * other.imaginary + imaginary * other.real
+        );
     }
-    float modulus(){
-        return sqrt(imaginary * imaginary + real * real);
+
+    Complex operator/(const Complex &other) const {
+        double denominator =
+            other.real * other.real +
+            other.imaginary * other.imaginary;
+
+        return Complex(
+            (real * other.real + imaginary * other.imaginary)
+                / denominator,
+
+            (imaginary * other.real - real * other.imaginary)
+                / denominator
+        );
     }
-    void display(){
-        if (imaginary > 0){
-            cout << real << " + " << imaginary << "i" << endl;
-        }else{
-            cout << real << " " << imaginary << "i" << endl;
+
+    bool operator==(const Complex &other) const {
+        return real == other.real &&
+               imaginary == other.imaginary;
+    }
+
+    bool operator!=(const Complex &other) const {
+        return !(*this == other);
+    }
+
+    double modulus() const {
+        return sqrt(real * real + imaginary * imaginary);
+    }
+
+    friend ostream& operator<<(ostream &out, const Complex &c) {
+        out << c.real;
+
+        if (c.imaginary >= 0) {
+            out << " + " << c.imaginary << "i";
+        } else {
+            out << " - " << -c.imaginary << "i";
         }
-        
+
+        return out;
     }
 };
-int main(){
-    Complex c1(3,4);
-    Complex c2(-7,3);
-    Complex c3(0,0);
-    c1.display();
-    cout << "c1 modulus = "<< c1.modulus() << endl;
-    c3 = c1 / c2;
-    c3.display();
+
+int main() {
+    Complex c1(4, 3);
+    Complex c2(2, -1);
+
+    cout << "First number: " << c1 << endl;
+    cout << "Second number: " << c2 << endl;
+
+    cout << "Addition: " << c1 + c2 << endl;
+    cout << "Subtraction: " << c1 - c2 << endl;
+    cout << "Multiplication: " << c1 * c2 << endl;
+    cout << "Division: " << c1 / c2 << endl;
+
+    cout << "Modulus of first number: "
+         << c1.modulus() << endl;
+
+    cout << "Are they equal? "
+         << (c1 == c2) << endl;
+
+    cout << "Are they different? "
+         << (c1 != c2) << endl;
+
     return 0;
 }
