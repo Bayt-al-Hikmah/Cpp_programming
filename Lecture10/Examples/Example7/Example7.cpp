@@ -17,7 +17,7 @@ public:
     weak_ptr<Node> parent;
 
     explicit Node(string nodeName)
-        : name(move(nodeName)) {}
+        : name(std::move(nodeName)) {}
 
     ~Node() {
         cout << "Destroying: " << name << '\n';

@@ -1,17 +1,17 @@
-## Objectives :
-- Learn About Comparison Operators
-- Learn About Logical Operator
-- Working with Bitwise Operator
-- Learn Control Flow
-- Learn About Loops
+# Operators, Decisions, and Loops
 
+## Learning Objectives
+- Use comparison, logical, and bitwise operators.
+- Choose between `if`, `else if`, `else`, and `switch` for decisions.
+- Repeat work with `while`, `do-while`, and `for` loops.
+- Control loops with `break`, `continue`, and `return`.
+- Combine conditions and loops to solve small problems.
 ## Comparison Operators
 C++ provides comparison operators to compare two values and determine the relationship between them.
 
 The result of a comparison is a boolean (`bool`) value:
 - `true` represented as `1` when printed as a normal boolean value.
 - `false` represented as `0` when printed as a normal boolean value.
-    
 
 Comparison operators are commonly used in conditions, such as `if`, `while`, and `for` statements.
 ### Comparison Operators
@@ -42,14 +42,11 @@ int main() {
 }
 ```
 ## Logical Operators
-Sometimes a program needs to check more than one condition at the same time. Imagine we want to check whether a number is between `1` and `10`.
-
-We don't just need to know whether the number is greater than `1`. We also need to know whether it is less than `10`.
+Sometimes a program needs to check more than one condition at the same time. Imagine we want to check whether a number is between `1` and `10`. To do that we need to check whether the number is greater than `1`, and also if it less than `10`.
 
 We can combine these conditions using logical operators. The result of a logical operation is a boolean (`bool`) value: `true` or `false`.
-
 ### `&&` Logical AND
-The `&&` operator means "and". it returns `true` only when **all conditions are true**.    
+The `&&` operator means "and". it returns `true` only when **all conditions are true**.     
 For example
 ```cpp
 B > A && B < 10
@@ -114,20 +111,12 @@ must always be `false`.
 
 So if C++ evaluates the first condition and finds that it is false, there is no reason to evaluate the second condition.
 For example:
-
 ```cpp
 if (A > 10 && B > 5) {
     // ...
 }
 ```
 If `A > 10` is false, C++ already knows that the whole expression must be false.
-
-Therefore:
-```
-B > 5
-```
-is never evaluated.
-
 ### Short-Circuiting with `||`
 The same idea works in the opposite direction with `||`.
 
@@ -151,31 +140,23 @@ age > 18
 ```
 is already true, `checkSomething()` is not called.
 ## Bitwise Operators
-Computers ultimately represent integer values using **bits** `0`s and `1`s.
-
+Bitwise operators let us work with the individual bits that make up integers.  
 For example, the number `5` can be represented in binary as:
 ```
 5 = 0101
 ```
-And `3` is:
-```
-3 = 0011
-```
-Until now, we have mostly treated `5` and `3` as complete numbers.
-
-Bitwise operators let us work with the individual bits that make up those numbers. This is particularly useful in areas such as embedded systems, hardware programming, networking, compression, permissions, and other low-level programming.
+With bitwise operator we can manipulate the integer bits. This is particularly useful in areas such as embedded systems, hardware programming, networking, compression, permissions, and other low-level programming.
 
 C++ provides several bitwise operators:
 
-|Operator|Name|
-|---|---|
-|`&`|Bitwise AND|
-|`|`|Bitwise OR|
-|`^`|Bitwise XOR|
-|`~`|Bitwise NOT|
-|`<<`|Left shift|
-|`>>`|Right shift|
-
+| Operator | Name        |
+| -------- | ----------- |
+| `&`      | Bitwise AND |
+| ``\|``   | Bitwise OR  |
+| `^`      | Bitwise XOR |
+| `~`      | Bitwise NOT |
+| `<<`     | Left shift  |
+| `>>`     | Right shift |
 ### `&`  Bitwise AND
 Bitwise AND performs an AND operation on each corresponding bit, it compares the bits one by one. A resulting bit is `1` only when **both corresponding bits are** `1`. 
 
@@ -284,7 +265,7 @@ Shift one position to the right:
 ```
 which is `5`.
 ## Control Flow
-Up to this point, our programs have mostly executed instructions from top to bottom.    
+So far, our programs have mostly executed instructions from top to bottom, one after another.   
 For example:
 ```cpp
 cout << "First";
@@ -293,26 +274,11 @@ cout << "Third";
 ```
 The program starts with the first instruction, then moves to the second, and finally to the third.
 
-But real programs rarely work this way all the time. Sometimes we want the program to **make a decision**.
+However, programs often need to change this execution order based on certain conditions. For example, we may want to print `"Positive"` only if a number is greater than zero, deny access if a user is under 18, or perform different operations depending on the option they select.
 
-For example:
-- If the user enters a positive number, print `"Positive"`.
-- If the user is under 18, deny access.
-- If the user enters `1`, perform one operation; if they enter `2`, perform another.
-- If a condition is true, do something; otherwise, do something else.
-    
-
-This is what **control flow** allows us to do.
-
-Control flow refers to the way a program decides which instructions to execute and in what order.
+This is where **Control Flow** comes in. Control flow determines which instructions a program executes and in what order, allowing it to make decisions and repeat instructions when needed.
 ### Conditional Statements
 A conditional statement allows us to execute code depending on whether a condition is `true` or `false`.
-
-C++ provides several ways to do this:
-- `if`
-- `else if`
-- `else`
-- the **ternary operator** `?:`
 #### `if` Statement
 The `if` statement allow us to run instructions only if this condition is true.
 
@@ -339,14 +305,8 @@ Here, C++ checks:
 age >= 18
 ```
 Since `20 >= 18` is `true`, the message is printed.
-
-If we change the value:
-```cpp
-int age = 15;
-```
-the condition becomes false, so the code inside the `if` block is skipped.
 #### `else` Statement
-Sometimes we don't want to simply skip the code when the condition is false. We want the program to do something else. This is where `else` comes in.
+`else` statement help us to provide alternative path when the condition is false. 
 
 The structure becomes:
 ```cpp
@@ -376,15 +336,7 @@ age >= 18
 ```
 If it is true, the first block runs, If it is false, the `else` block runs.
 #### `else if`
-What if we have more than two possibilities?
-
-For example, a number can be:
-- positive
-- negative
-- zero
-    
-
-An `if` and an `else` are not enough because we have three different cases. This is where `else if` is useful.
+Finally with `else if` we can check multiple possibilities
 
 The structure looks like this:
 ```cpp
@@ -432,49 +384,6 @@ If the user enters `10`, the first condition is true:
 number > 0
 ```
 so `"Positive"` is printed.
-
-If the user enters `-5`, the first condition is false, so C++ checks:
-```cpp
-number < 0
-```
-This time it is true, so `"Negative"` is printed.
-
-If the user enters `0`, both previous conditions are false, so the `else` block runs.
-
-
-With an `if / else if / else` chain, C++ checks conditions in order:
-```text
-if
- ↓
-else if
- ↓
-else if
- ↓
-else
-```
-Once one condition is satisfied, the rest of the chain is skipped. This is important because the order of your conditions can affect the result.
-
-For example:
-```cpp
-if (number > 0) {
-    // ...
-}
-else if (number > 10) {
-    // ...
-}
-```
-The second condition can never be reached for values greater than `10`, because those values already satisfy `number > 0`.
-
-A better ordering would be:
-```cpp
-if (number > 10) {
-    // ...
-}
-else if (number > 0) {
-    // ...
-}
-```
-
 #### The Ternary Operator
 Sometimes we have a very small decision where we simply want to choose between **two values**.
 
@@ -497,7 +406,6 @@ So the previous example can become:
 ```cpp
 string status = (age >= 18) ? "Adult" : "Minor";
 ```
-
 ### Switch Statements
 There is another situation where `if/else` isn't always the clearest option. Imagine we have a variable representing a menu choice:
 ```cpp
@@ -633,8 +541,6 @@ switch (number) {
 }
 ```
 The `[[fallthrough]]` attribute tells both the compiler and other programmers that this fallthrough is intentional.
-
-
 #### `default`
 What happens if none of the cases match? That's what `default` is for.
 ```cpp
@@ -655,8 +561,7 @@ switch (number) {
 ```
 If `number` is neither `1` nor `2`, the `default` block executes.  `default` is similar to the final `else` in an `if/else if/else` chain.
 ## Loops
-
-So far, our programs have mostly executed each instruction once. But what if we want to perform the same operation **many times**?
+A program normally executes each instruction once. But what if we want to perform the same operation multiple times?
 
 For example, imagine we want to print `"Hello"` five times:
 ```cpp
@@ -666,27 +571,11 @@ cout << "Hello" << endl;
 cout << "Hello" << endl;
 cout << "Hello" << endl;
 ```
-This works, but it becomes a terrible solution if we need to repeat the operation 100 or 1,000 times.
+This works, but repeating the same instructions becomes impractical when we need to perform an operation hundreds or thousands of times.
 
-Instead of writing the same instructions over and over again, we can tell C++ to Repeat  block of code for us.
+Instead of writing the same code over and over again, we can use a **loop** to repeat a block of code.
 
-This is what a **loop** does.
-
-A loop allows us to execute a block of code repeatedly according to some rule.
-
-The rule might be:
-- Repeat while a condition is true.
-- Repeat a specific number of times.
-- Repeat once for every element in a collection.
-
-C++ provides several types of loops:
-- `while`
-- `do-while`
-- `for`
-- **range-based `for`**
-
-The first three are the traditional loop structures. The range-based `for` loop was introduced in **C++11** and provides a much simpler way to iterate through collections and ranges of values.
-
+A loop allows us to execute a block of code repeatedly, either a specified number of times or as long as a condition is true.
 ### `while` Loop
 A `while` loop is useful when we know the condition that should keep the loop running, but we don't necessarily know how many iterations will be needed.
 
@@ -732,7 +621,6 @@ At that point:
 5 < 5
 ```
 is false, so the loop stops.
-
 ### `do-while` Loop
 The `while` loop checks its condition **before** executing the loop body. Sometimes, however, we want the code to run **at least once**, and only then decide whether it should continue.
 
@@ -843,7 +731,6 @@ for (int number : numbers) {
 ```
 This means for every element in `numbers`, place that element into `number` and execute the loop body.
 #### References in Range-Based `for`
-
 By default the range based loop creates a copy of each element.
 ```cpp
 for (int number : numbers)
@@ -871,7 +758,6 @@ for (const int& number : numbers) {
 }
 ```
 ### Break and Continue :
-
 #### `break`
 Our loops have stopped naturally when their conditions became false. But sometimes we want to stop a loop immediately, before its normal condition tells it to stop.
 
@@ -926,7 +812,6 @@ The output is:
 7
 9
 ```
-
 #### Early `return`
 Unlike `break` and `continue`, `return` is not specifically a loop statement, Instead, `return` ends the execution of the current function. This becomes especially useful when a loop is inside a function.
 
@@ -951,19 +836,18 @@ return true;
 immediately ends the function, there is no reason to continue searching.
 
 This is sometimes called an **early return** because the function returns before reaching the end of its normal flow.
-
-## Tasks :
+## Tasks
 ### Task 1 :
 
 Write a C++ program that reads three numbers, **a**, **b**, and **c**, from the user, and then solves the quadratic equation:
 $$
-a^2+bx+c =0
+ax^2 + bx + c = 0
 $$
-The program should handle the following cases:
-1. When the discriminant $b^2 - 4ac$ is positive, there are two real and distinct roots.
-2. When the discriminant is zero, there is one real root .
-3. When the discriminant is negative, the equation has no real solutions.
+The program should handle these cases:
+1. If `a` is not zero, use the discriminant $b^2 - 4ac$: a positive value gives two distinct real roots, zero gives one repeated real root, and a negative value gives no real roots.
+2. If `a` is zero but `b` is not zero, solve the resulting linear equation.
+3. If both `a` and `b` are zero, report either no solution (`c` is non-zero) or infinitely many solutions (`c` is zero).
 ### Task 2:
-Write a program that reads a number **n** from the user and displays all the prime numbers from 0 to **n**.
+Write a program that reads a number **n** from the user and displays all the prime numbers from 2 through **n**.
 #### Hint :
-A prime number is a number that can only be divided by 1 and itself.
+A prime number is an integer greater than 1 whose only positive divisors are 1 and itself.

@@ -1,75 +1,117 @@
-# C++ Programming Lectures
+# C++ Programming Course
 
-![C++ Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/ISO_C%2B%2B_Logo.svg/256px-ISO_C%2B%2B_Logo.svg.png)
+A twelve-lecture course that starts with basic C++ syntax and gradually introduces memory, functions, object-oriented design, the standard library, generic programming, resource management, file handling, and concurrency.
 
-Welcome to the **C++ Programming Lectures** repository by [Bayt-al-Hikmah](https://github.com/Bayt-al-Hikmah)! This collection of lecture notes is designed for beginners and intermediate learners aiming to master C++ programming fundamentals. Whether you're new to coding or refreshing your skills, these notes provide structured, step-by-step guidance through core concepts.
+The notes are intended for guided learning and hands-on practice. Each lecture contains explanations and examples; most lectures also include practice tasks and separate solution files.
 
-Bayt-al-Hikmah (House of Wisdom) is dedicated to preserving and disseminating knowledge, inspired by the historic intellectual center of the Islamic Golden Age. These lectures emphasize clear explanations, practical examples, and hands-on exercises to build a strong foundation in modern C++.
+## Course map
+
+| Lecture                      | Topic                       | Main ideas                                                                                          |
+| ---------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
+| [01](Lecture1/Lecture1.md)   | C++ foundations             | Program structure, compilation, variables, types, conversions, arithmetic, input, and output        |
+| [02](Lecture2/Lecture2.md)   | Operators and control flow  | Comparisons, logical and bitwise operators, decisions, and loops                                    |
+| [03](Lecture3/Lecture3.md)   | Pointers and data           | Pointers, references, arrays, dynamic storage, C++ strings, and vectors                             |
+| [04](Lecture4/Lecture4.md)   | Functions                   | Parameters, return values, scope, overloads, recursion, lambdas, headers, and multiple source files |
+| [05](Lecture5/Lecture5.md)   | Object-oriented programming | Classes, encapsulation, constructors, operator overloading, inheritance, and polymorphism           |
+| [06](Lecture6/Lecture6.md)   | Data modelling and errors   | Enumerations, structures, aliases, exceptions, assertions, `optional`, and `expected`               |
+| [07](Lecture8/Lecture7.md)            | Containers and iterators    | Sequence, associative, and unordered containers; adaptors; iterator safety                          |
+| [08](Lecture7/Lecture8.md)            | Algorithms and callables    | Standard algorithms, lambdas, captures, function objects, and `std::function`                       |
+| [09](Lecture9/Lecture9.md)   | Templates                   | Function and class templates, type traits, concepts, and compile-time programming                   |
+| [10](Lecture10/Lecture10.md) | Resource management         | RAII, smart pointers, value categories, move semantics, and type-safe alternatives                  |
+| [11](Lecture11/Lecture11.md) | File I/O                    | File streams, string streams, binary data, and output formatting                                    |
+| [12](Lecture12/Lecture12.md) | Concurrency                 | Threads, mutexes, condition variables, asynchronous tasks, futures, and promises                    |
 
 ## Prerequisites
 
-- Basic familiarity with computers and file management.
-- No prior programming experience required (though helpful).
-- A C++ compiler (e.g., GCC via MinGW on Windows, or Clang on macOS/Linux) and an IDE like Visual Studio Code, Code::Blocks, or CLion.
+No previous programming experience is required. You should be comfortable using a computer, editing text files, and working with folders and a terminal. A basic understanding of algebra is helpful for some exercises.
 
-### Setup Instructions
+## Compiler and C++ standard
 
-1. Install a C++ compiler:
-    - **Windows**: Download MinGW from [mingw-w64.org](https://www.mingw-w64.org/downloads/).
-    - **macOS**: Use Homebrew: `brew install gcc`.
-    - **Linux**: `sudo apt update && sudo apt install g++` (Ubuntu/Debian).
-2. Install an editor/IDE: VS Code with the C/C++ extension is recommended for beginners.
-3. Test your setup: Compile and run a "Hello, World!" program (example in Lecture 1).
+Use a recent C++ compiler:
 
-## Course Overview
+- **Windows:** Visual Studio 2022 or a recent MinGW-w64/GCC installation.
+- **Linux:** GCC or Clang installed through your distribution's package manager.
+- **macOS:** Apple Clang or an up-to-date LLVM Clang toolchain.
 
-This 6-lecture series covers essential C++ topics progressively. Each lecture includes:
+The course uses **C++20 as its main language baseline**. A few examples discuss older or newer features explicitly. In particular, `std::expected` is a **C++23** library feature and requires a standard library that implements it. If your compiler does not support that section yet, continue with the `std::optional` and exception-handling material.
 
-- Theoretical explanations.
-- Code examples and snippets.
-- Exercises for practice.
-- References for further reading.
+Check your compiler version:
 
+```sh
+g++ --version
+clang++ --version
+```
 
-| Lecture   | Topic                              | Key Concepts Covered                                                             |
-| --------- | ---------------------------------- | -------------------------------------------------------------------------------- |
-| Lecture 1 | Variables and Input-Output         | Variables, data types (int, float, char, etc.), user input/output with cin/cout. |
-| Lecture 2 | Control Flow                       | Logical/comparison operators, if-else, switch-case, for/while/do-while loops.    |
-| Lecture 3 | Pointers and Data Structures       | Pointers, dynamic memory allocation, dynamic arrays, vectors, structs, typedef.  |
-| Lecture 4 | Functions and Header Files         | Function creation, parameters, return types, header files, scope rules.          |
-| Lecture 5 | Object-Oriented Programming        | OOP principles, classes, objects, namespaces, error handling.                    |
-| Lecture 6 | Advanced Data Structures and Files | Data structures, file I/O, working with bitmap and WAV files.                    |
+Compile a single-file example with GCC:
 
+```sh
+g++ -std=c++20 -Wall -Wextra -Wpedantic main.cpp -o app
+./app
+```
 
-**Recommended Pace**: 1-2 lectures per week, with time for coding practice. Total estimated time: 20-30 hours.
+Or with Clang:
 
-## Practice and Projects
+```sh
+clang++ -std=c++20 -Wall -Wextra -Wpedantic main.cpp -o app
+./app
+```
 
-- **Exercises**: Each lecture ends with coding challenges. Solutions can be added in a separate `/exercises` folder.
-- **Mini-Project Ideas**:
-    - Lecture 3: Simple calculator app.
-    - Lecture 5: Student grade management system using arrays.
-    - Lecture 6: Dynamic list implementation with pointers.
-- Resources: [cppreference.com](https://en.cppreference.com/w/) for docs, [LeetCode](https://leetcode.com/) for problems.
+On Windows, run the generated executable as `app.exe` from the appropriate terminal. IDEs can perform the same build and run steps through their project settings.
 
-## Contributing
+### Compiling a multi-file example
 
-We welcome contributions! Help expand these notes with:
+When a lecture demonstrates a header and multiple source files, compile all required `.cpp` files together. For example:
 
-- Corrections or clarifications.
-- Additional examples or exercises.
-- Translations or adaptations.
+```sh
+g++ -std=c++20 -Wall -Wextra -Wpedantic main.cpp math_utils.cpp -o app
+```
 
-## License
+Do not compile every `.cpp` file in the course into one executable. Most examples and solutions contain their own `main()` function and are intended to be built separately.
 
-This project is licensed under the [MIT License](https://grok.com/c/LICENSE) – feel free to use, modify, and distribute.
+## Repository layout
 
+```text
+Cpp_programming/
+├── README.md
+├── Lecture1/
+│   ├── Lecture1.md
+│   ├── Examples/
+│   └── Solutions/
+├── Lecture2/
+│   ├── Lecture2.md
+│   ├── Examples/
+│   └── Solutions/
+└── ...
+```
+
+Each lecture folder contains:
+
+- `LectureN.md` — the lesson notes.
+- `Examples/` — small programs that demonstrate the concepts.
+- `Solutions/` — worked solutions to the practice tasks, where provided.
+- `attachments/` — diagrams or images used by the notes, where required.
+
+## Recommended study method
+1. Read one section at a time and type the examples yourself rather than only copying them.
+2. Compile each example independently with warnings enabled.
+3. Change values and inputs to see how the program behaves, including invalid inputs and boundary cases.
+4. Attempt the practice tasks before opening the solution files.
+5. Explain the result in your own words. If you cannot explain why the code works, revisit the relevant section.
+6. Keep a small project that uses ideas from earlier lectures as you progress.
+
+A reasonable pace is one or two lectures per week, with additional time for coding and review. The advanced lectures may need more time than the introductory ones.
+## Important learning notes
+- Prefer `std::string`, `std::vector`, and smart pointers for ordinary application code. Raw pointers and `new`/`delete` are introduced to explain memory and ownership, not as the default way to manage data.
+- Use `const` to communicate which values should not be modified, and validate input before using it.
+- Do not assume that a program which compiles is necessarily correct. Check edge cases, object lifetimes, iterator invalidation, file errors, and thread synchronization.
+- Raw binary writes of C++ structures are generally not portable between different compilers, platforms, or program versions. The Lecture 11 notes explain the limitations.
+
+## Contributing and reuse
+Corrections, clearer explanations, and additional tests are welcome. Please preserve the lesson sequence and make sure new examples compile with the stated language standard.
 
 ## Contact
-
 Questions? Open an issue or reach out via:
 
 - GitHub: [@Bayt-al-Hikmah](https://github.com/Bayt-al-Hikmah)
 - Email: [alitigui](mailto:alitighiouart2001@gmail.com) 
 
-Happy coding! 🚀 Let's build wisdom through code.

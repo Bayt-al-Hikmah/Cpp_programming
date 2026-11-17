@@ -1,40 +1,51 @@
+#include <iomanip>
 #include <iostream>
-using namespace std;
+#include <vector>
 
-int main(){
-    float **subjects,sum = 0,avg = 0 ;
-    int l, k;
-    int *subjects_tests_number;
-    int total_test_numbers = 0;
-    cout << "Enter number of subjects : ";
-    cin >> l;
-    subjects = new float*[l];
-    subjects_tests_number = new int[l];
-    for (int i = 0; i < l; i++){
-        cout << "Enter How many test subject " << i + 1 << " have: ";
-        cin >> k;
-        *(subjects + i) = new float[k];
-        *(subjects_tests_number + i) = k;
-        for (int j = 0; j < k; j++){
-            cout << "Enter test " << j + 1 << " of subject " << i + 1 << " grade: ";
-            cin >> *(*(subjects + i) + j);
-        }
+int main() {
+    int subjectCount{};
+    std::cout << "Enter the number of subjects: ";
+    if (!(std::cin >> subjectCount) || subjectCount <= 0) {
+        std::cerr << "The number of subjects must be positive.\n";
+        return 1;
     }
-    for (int i = 0; i < l; i++){
-        avg = 0;
-        cout << "Subject " << i + 1 << " tests marks and average :\n";
-        for (int j = 0; j < *(subjects_tests_number + i); j++){
-            cout << "Test " << j + 1 << " grade : " << *(*(subjects + i) + j) << endl;
-            avg +=  *(*(subjects + i) + j) / *(subjects_tests_number + i);
-            sum += *(*(subjects + i) + j);
-            total_test_numbers++; 
+
+    std::vector<std::vector<double>> marks(static_cast<std::size_t>(subjectCount));
+    double totalMarks = 0.0;
+    std::size_t totalTests = 0;
+
+    for (int subject = 0; subject < subjectCount; ++subject) {
+        int testCount{};
+        std::cout << "How many tests were taken in subject " << subject + 1 << "? ";
+        if (!(std::cin >> testCount) || testCount <= 0) {
+            std::cerr << "Each subject must have at least one test.\n";
+            return 1;
         }
-        delete[] *(subjects + i);
-        cout << "The average of subject " << i + 1 << " is " << avg << endl;
+
+        auto& subjectMarks = marks[static_cast<std::size_t>(subject)];
+        subjectMarks.resize(static_cast<std::size_t>(testCount));
+        double subjectTotal = 0.0;
+
+        for (int test = 0; test < testCount; ++test) {
+            std::cout << "Enter mark " << test + 1 << " for subject " << subject + 1 << ": ";
+            double mark{};
+            if (!(std::cin >> mark) || mark < 0.0 || mark > 20.0) {
+                std::cerr << "Enter a valid mark between 0 and 20.\n";
+                return 1;
+            }
+            subjectMarks[static_cast<std::size_t>(test)] = mark;
+            subjectTotal += mark;
+            totalMarks += mark;
+            ++totalTests;
+        }
+
+        std::cout << "Subject " << subject + 1 << " marks: ";
+        for (double mark : subjectMarks) {
+            std::cout << mark << ' ';
+        }
+        std::cout << "| Average: " << subjectTotal / subjectMarks.size() << '\n';
     }
-    avg = sum / total_test_numbers;
-    cout << "The total average is " << avg << endl;
-    delete[] subjects_tests_number;
-    delete[] subjects;
-    return 0;
+
+    std::cout << std::fixed << std::setprecision(2)
+              << "Overall average: " << totalMarks / static_cast<double>(totalTests) << '\n';
 }

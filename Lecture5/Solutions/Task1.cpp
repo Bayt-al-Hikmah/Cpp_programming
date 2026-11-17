@@ -1,86 +1,71 @@
+#include <cmath>
 #include <iostream>
+#include <stdexcept>
+#include <utility>
 #include <string>
-using namespace std;
 
 class BankAccount {
-private:
-    string accountNumber;
-    string accountHolder;
-    double balance;
-
 public:
-    BankAccount(string number, string holder, double initialBalance) {
-        accountNumber = number;
-        accountHolder = holder;
-        balance = initialBalance;
-    }
-
-    string getAccountNumber() const {
-        return accountNumber;
-    }
-
-    string getAccountHolder() const {
-        return accountHolder;
-    }
-
-    double getBalance() const {
-        return balance;
-    }
-
-    void setAccountHolder(string accountHolder) {
-        this->accountHolder = accountHolder;
-    }
-
-    void deposit(double amount) {
-        balance += amount;
-    }
-
-    void withdraw(double amount) {
-        if (amount <= balance) {
-            balance -= amount;
-        } else {
-            cout << "Insufficient balance." << endl;
+    BankAccount(std::string number, std::string holder, double initialBalance)
+        : accountNumber_(std::move(number)),
+          accountHolder_(std::move(holder)),
+          balance_(initialBalance) {
+        if (accountNumber_.empty() || accountHolder_.empty() ||
+            !std::isfinite(balance_) || balance_ < 0.0) {
+            throw std::invalid_argument("Invalid account details or initial balance.");
         }
     }
 
-    void transfer(BankAccount &destination, double amount) {
-        if (amount <= balance) {
-            balance -= amount;
-            destination.balance += amount;
-        } else {
-            cout << "Insufficient balance for transfer." << endl;
+    bool deposit(double amount) {
+        if (!std::isfinite(amount) || amount <= 0.0) {
+            return false;
         }
+        balance_ += amount;
+        return true;
     }
+
+    bool withdraw(double amount) {
+        if (!std::isfinite(amount) || amount <= 0.0 || amount > balance_) {
+            return false;
+        }
+        balance_ -= amount;
+        return true;
+    }
+
+    bool transferTo(BankAccount& destination, double amount) {
+        if (this == &destination) {
+            return std::isfinite(amount) && amount > 0.0 && amount <= balance_;
+        }
+        if (!std::isfinite(amount) || amount <= 0.0 || amount > balance_) {
+            return false;
+        }
+        balance_ -= amount;
+        destination.balance_ += amount;
+        return true;
+    }
+
+    double balance() const { return balance_; }
 
     void display() const {
-        cout << "Account Number: " << accountNumber << endl;
-        cout << "Account Holder: " << accountHolder << endl;
-        cout << "Balance: " << balance << endl;
+        std::cout << "Account: " << accountNumber_
+                  << " | Holder: " << accountHolder_
+                  << " | Balance: " << balance_ << '\n';
     }
+
+private:
+    std::string accountNumber_;
+    std::string accountHolder_;
+    double balance_;
 };
 
 int main() {
-    BankAccount account1("ACC001", "Ali", 1000);
-    BankAccount account2("ACC002", "Sara", 500);
+    BankAccount account1("ACC001", "Ali", 1000.0);
+    BankAccount account2("ACC002", "Sara", 500.0);
 
-    cout << "Initial accounts:" << endl;
-
-    account1.display();
-    cout << endl;
-
-    account2.display();
-    cout << endl;
-
-    account1.deposit(200);
-    account1.withdraw(100);
-    account1.transfer(account2, 300);
-
-    cout << "After transactions:" << endl;
+    account1.deposit(200.0);
+    account1.withdraw(100.0);
+    account1.transferTo(account2, 300.0);
 
     account1.display();
-    cout << endl;
-
     account2.display();
-
-    return 0;
 }

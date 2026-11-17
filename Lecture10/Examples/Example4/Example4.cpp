@@ -14,7 +14,7 @@ private:
 
 public:
     Sensor(string sensorName, double sensorReading)
-        : name(move(sensorName)), reading(sensorReading) {}
+        : name(std::move(sensorName)), reading(sensorReading) {}
 
     void display() const {
         cout << "Sensor: " << name

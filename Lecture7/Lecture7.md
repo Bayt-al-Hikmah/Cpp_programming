@@ -1,11 +1,11 @@
+# Standard Library Containers and Iterators
 
-## Objectives
-- Understand the purpose and main components of the Standard Template Library (STL).
-- Work with sequence containers, associative containers, unordered containers, and container adaptors.
-- Understand iterators, iterator categories, and how iterators connect containers to algorithms.
-- Manage dynamic arrays using `std::vector`, including capacity, reallocation, and iterator invalidation.
-
-## The Standard Template Library 
+## Learning Objectives
+- Understand the roles of standard-library containers, iterators, and algorithms.
+- Choose suitable sequence, associative, unordered, and adaptor containers.
+- Traverse containers with iterators and range-based loops.
+- Understand vector capacity, reallocation, and iterator/reference invalidation.
+## The Standard Library Containers and Iterators
 
 ### Introduction
 In our previous lectures, we learned how to organize programs using functions, structures, classes, and objects. We also explored inheritance, polymorphism, exception handling, and resource management. These concepts help us design programs that are organized, reusable, and easier to maintain.
@@ -207,8 +207,7 @@ Let's identify the role of each component.
 
 Notice how `find()` does not need to know that the data is stored in a vector. It works with iterators that describe a suitable range.
 
-This is one of the most important design ideas behind the STL: containers manage data, iterators provide access to ranges, and algorithms operate on those ranges.**
-
+This is one of the most important design ideas behind the STL: containers manage data, iterators provide access to ranges, and algorithms operate on those ranges.
 ### Sequence Containers
 Sequence containers store elements in a linear sequence. The elements have an order, and that order determines how we traverse them. Depending on the container, we may access elements by index, insert elements at either end, or insert and remove elements at different positions.
 
@@ -334,7 +333,7 @@ int main() {
     return 0;
 }
 ```
-The `push_back()` function adds an element to the end. in other hand the `pop_back()` function removes the last element. It does not return the removed value, the `front()` and `back()` functions access the first and last elements, respectively.
+The `push_back()` function adds an element to the end. whereas `pop_back()` removes the last element, the `front()` and `back()` functions access the first and last elements, respectively.
 
 These functions assume that the vector contains at least one element. Calling `front()`, `back()`, or `pop_back()` on an empty vector is not valid.
 #### Double-Ended Queues: `std::deque`
@@ -469,8 +468,6 @@ We have now examined five sequence containers. Although they can all store seque
 |`std::deque`|Multiple memory blocks|Constant time|Efficient at both ends|Sequences modified at both ends|
 |`std::list`|Doubly linked nodes|No index access|Efficient at both ends|Frequent edits at known positions|
 |`std::forward_list`|Singly linked nodes|No index access|Efficient at the front|Forward-only linked sequences|
-
-
 ### Associative Containers and Container Adaptors
 Sequence containers organize elements into a sequence. Sometimes, however, the order in which we insert elements is not the most important property.
 
@@ -779,7 +776,8 @@ Let's compare the main associative containers.
 | `std::multimap`      | Key-value pairs | Yes            | Sorted by key   | Logarithmic               |
 | `std::unordered_set` | Keys            | No             | No sorted order | Average constant time     |
 | `std::unordered_map` | Key-value pairs | No             | No sorted order | Average constant time     |
-#### Container Adaptors: `std::stack`
+### Container Adaptors: 
+#### `std::stack`
 The containers we have examined expose different ways to access their elements. A container adaptor takes an underlying container and exposes a more specialized interface.
 
 For example, a stack follows the **Last In, First Out (LIFO)** principle. The last element added is the first element removed.
@@ -813,8 +811,8 @@ The main operations are:
 - `pop()` removes the top element.
 - `empty()` checks whether the stack is empty.
 - `size()` returns the number of elements.
-#### Queue Adaptors: `std::queue`
-A queue follows the **First In, First Out (FIFO)** principle. The first element inserted is the first element removed.
+#### `std::queue`
+A queue work in the reversed logic, the **First In, First Out (FIFO)**. The first element inserted is the first element removed.
 
 C++ provides `std::queue` for this behavior.
 ```CPP
@@ -848,10 +846,10 @@ The main operations are:
 - `pop()` removes the first element.
 - `empty()` checks whether the queue is empty.
 - `size()` returns the number of elements.
-#### Priority Queues: `std::priority_queue`
+#### `std::priority_queue`
 Sometimes, processing elements in insertion order is not appropriate. Imagine a system that schedules tasks according to their priority. A task with a higher priority should be processed before tasks with lower priorities, even if it was inserted later.
 
-C++ provides `std::priority_queue` for this situation.By default, a priority queue places the largest element at the top.
+C++ provides `std::priority_queue` for this situation. By default, a priority queue places the largest element at the top.
 ```cpp
 #include <iostream>
 #include <queue>
@@ -888,7 +886,6 @@ Its main operations include:
 - `pop()` removes that element.
 - `empty()` checks whether the queue is empty.
 - `size()` returns the number of elements.
-
 ### Vector Memory Management and Iterator Safety
 In our earlier examples, we used `std::vector` as though it were simply an array that grows automatically. That description is useful as a starting point, but to write reliable C++ programs, we need to understand how a vector manages its memory.
 #### Understanding Vector Size and Capacity
@@ -973,8 +970,6 @@ int value = 20;
 numbers.push_back(value);
 ```
 If the vector has enough unused capacity, adding an element normally does not require allocating new storage. However, if the vector is already full, it must obtain more storage before it can add another element.
-
-This leads us to an important aspect of vector memory management: **reallocation**.
 #### Adding Elements with `emplace_back()`
 The `emplace_back()` function constructs a new element directly at the end of the vector using the arguments supplied to it.
 
@@ -1029,14 +1024,14 @@ students.push_back(Student("Ali", 23));
 which constructs a temporary `Student` and passes it to `push_back()`. Modern C++ can move that temporary into the vector, so this version is not necessarily expensive.
 
 The key distinction is that `emplace_back()` constructs the element from the supplied arguments, while `push_back()` accepts an existing element to copy or move.
-#### Understanding Vector Reallocation
+### Understanding Vector Reallocation
 A vector stores its elements in contiguous memory. Eventually, adding elements may exceed the capacity of its current storage.
 
 When that happens, the vector must allocate a larger block of memory and transfer its elements into the new storage. This process is called **reallocation**.
 
 Conceptually, imagine a vector with capacity three, suppose we add another element and the current capacity is insufficient, The vector obtains new storage, the new allocation may have more capacity than strictly required. The exact growth strategy is implementation-dependent.
 #### Iterator Invalidation
-Consider the following program:
+Reallocation can introduce problems when we work with iterator, Consider the following program:
 ```cpp
 #include <iostream>
 #include <vector>
@@ -1150,8 +1145,7 @@ for (auto it = numbers.begin(); it != numbers.end();) {
 }
 ```
 The `erase()` function returns an iterator to the element that follows the erased element, or `end()` if no such element exists. We assign that returned iterator to `it` and do not increment it again during the same iteration.
-
-## Tasks:
+## Tasks
 ### Task 1:
 Write a C++ program to manage students' examination grades using `std::vector`.
 

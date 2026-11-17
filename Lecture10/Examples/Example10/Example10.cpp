@@ -12,7 +12,7 @@ private:
 public:
     // Constructor
     explicit MeasurementBatch(vector<double> values)
-        : readings(move(values)) {
+        : readings(std::move(values)) {
         cout << "Batch constructed.\n";
     }
 
@@ -24,14 +24,14 @@ public:
 
     // Move constructor
     MeasurementBatch(MeasurementBatch&& other) noexcept
-        : readings(move(other.readings)) {
+        : readings(std::move(other.readings)) {
         cout << "Move constructor called.\n";
     }
 
     // Move-assignment operator
     MeasurementBatch& operator=(MeasurementBatch&& other) noexcept {
         if (this != &other) {
-            readings = move(other.readings);
+            readings = std::move(other.readings);
         }
 
         cout << "Move assignment called.\n";
@@ -62,7 +62,7 @@ int main() {
 
     cout << "\n=== Move Construction ===\n";
 
-    MeasurementBatch second(move(first));
+    MeasurementBatch second(std::move(first));
 
     second.display();
 
@@ -72,7 +72,7 @@ int main() {
 
     third.display();
 
-    third = move(second);
+    third = std::move(second);
 
     third.display();
 

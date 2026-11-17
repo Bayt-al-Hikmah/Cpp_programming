@@ -3,7 +3,10 @@
 #include <iostream>
 #include <string>
 #include <string_view>
+
 using namespace std;
+
+void printString(std::string_view text);
 
 int main() {
 
@@ -139,6 +142,6 @@ int main() {
 }
 
 // Function Using std::string_view
-void printString(string_view text) {
-    cout << "Function Output: " << text << endl;
+void printString(std::string_view text) {
+    std::cout << "Function Output: " << text << '\n';
 }

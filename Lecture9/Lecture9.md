@@ -1,9 +1,11 @@
-## Objectives
-- Understand generic programming and use function and class templates to write reusable code.
-- Apply template argument deduction, default parameters, specialization, and variadic templates to build flexible generic abstractions.
-- Inspect and transform types at compile time using type traits, conditional types, and `static_assert`.
-- Constrain templates with SFINAE, concepts, and `requires` clauses to ensure that generic code accepts appropriate types.
-- Use `constexpr`, `consteval`, `if constexpr`, and template metaprogramming to perform computations and make decisions at compile time.
+# Templates and Compile-Time Programming
+
+## Learning Objectives
+- Write reusable function and class templates.
+- Use specialization, variadic templates, and fold expressions.
+- Inspect and transform types with type traits and `static_assert`.
+- Constrain templates with concepts and `requires` expressions.
+- Understand `constexpr`, `consteval`, `constinit`, and `if constexpr`.
 
 ## Template Fundamentals
 ### Introduction to Generic Programming
@@ -109,7 +111,7 @@ Pair<double> p{3.14, 10};
 ```
 Because `U` defaults to `int`, we only need to specify `T`.
 ### Class Templates and Generic Data Structures
-We are not limited only to Function templates in C++ we can also use Class templates while Function templates generalize operations. Class templates generalize the types of objects and data structures.
+We are not limited only to Function templates, in C++ we can also use Class templates while Function templates generalize operations. Class templates generalize the types of objects and data structures.
 
 Suppose we want a simple container that stores a value of any supported type.
 ```cpp
@@ -226,8 +228,6 @@ int main() {
 }
 ```
 The specialization `TypeInfo<T*>` matches pointer types such as `int*` and `double*`, regardless of the pointed-to type.
-
-Function templates cannot be partially specialized. When a function template needs different behavior for particular argument types, we normally use function overloading, constraints, or explicit specialization.
 ### Variadic Templates and Parameter Packs
 Our previous templates accept a fixed number of arguments. But some operations must work with an arbitrary number of values.
 
@@ -264,8 +264,6 @@ The expression:
 ((std::cout << args << ' '), ...);
 ```
 Is a **fold expression**. It expands the parameter pack into a sequence of output operations.
-
-In this example, the comma operator sequences the output operations from left to right.
 #### Fold Expressions
 Fold expressions allow us to apply an operator repeatedly across a parameter pack. For example, we can calculate the sum of an arbitrary number of arguments:
 ```cpp
@@ -313,20 +311,20 @@ void logValues(const Args&... args) {
 ```
 The expression `args...` expands the function parameter pack into the arguments of `printAll()`.
 ### Compile-Time Type Inspection and Transformation
-Templates allow one implementation to work with different types, but not every type supports the same operations.
+Templates allow us to write one function that works with different types. However, not all types support the same operations.
 
-Consider a generic function that divides a value by two:
+Consider a function that divides a value by two:
 ```cpp
 template <typename T>
 T halve(T value) {
     return value / 2;
 }
 ```
-This function works for many numeric types, but it may not make sense for every type. A pointer, for example, cannot be divided by an integer.
+This function works with many numeric types, such as integers and floating-point numbers. However, it does not work with every type. For example, we cannot divide a pointer by an integer.
 
-We could allow the compiler to report an error when an unsupported type is used. However, when designing a generic library, it is often better to inspect types explicitly, select suitable implementations, and provide meaningful compile-time diagnostics.
+The compiler will report an error if we use an unsupported type. However, in generic programming, we may want to check the type before using an operation and provide a clear error message.
 
-C++ provides **type traits** for examining type properties and **type transformations** for constructing modified types.
+C++ provides **type traits** to inspect the properties of a type and **type transformations** to modify types during compilation.
 #### Type Traits
 A type trait is a compile-time facility that provides information about a type. The standard library defines many traits in the `<type_traits>` header.
 
@@ -353,18 +351,11 @@ The traits answer different questions:
 - `std::is_pointer<T>` determines whether `T` is a pointer type.
 - `std::is_same<T, U>` determines whether two types are identical.
 
-The `_v` forms, such as `std::is_integral_v<int>`, are convenient variable templates that expose the Boolean result directly. These traits do not inspect runtime values. They describe types known to the compiler.
+The `_v` forms, such as `std::is_integral_v<int>`, are convenient variable templates that expose the Boolean result directly. 
 #### Type Transformations
-Sometimes the original type contains reference or qualifier information that is inconvenient for a generic operation.
+Sometimes, a type contains extra information, such as references or qualifiers, that we do not need. C++ provides type transformations to modify a type and make it easier to use in generic programming.
 
-For example:
-```cpp
-int value = 10;
-int& reference = value;
-```
-The type `int&` is different from `int`. A template that needs to reason about the underlying value type may want to remove the reference.
-
-C++ provides `std::remove_reference`:
+For example, `int&` is a reference to an integer, while `int` is a regular integer type. We can use `std::remove_reference` to remove the reference and get the original type.
 ```cpp
 #include <iostream>
 #include <type_traits>
@@ -376,9 +367,9 @@ int main() {
     std::cout << std::is_same_v<ValueType, int> << '\n';
 }
 ```
-Here, `std::remove_reference_t<int&>` produces `int`. The `_t` suffix provides the resulting type directly.
+Here, `std::remove_reference_t<int&>` produces `int`. The `_t` suffix gives us the resulting type directly.
 
-Another useful transformation is `std::decay`. It approximates the type transformations that occur when an argument is passed by value: references and top-level cv-qualifiers are removed, and arrays and functions are converted to corresponding pointer types.
+Another useful transformation is `std::decay`. It removes references and `const` or `volatile` qualifiers. It also converts arrays and functions into pointers.
 ```cpp
 #include <type_traits>
 
@@ -390,13 +381,9 @@ int main() {
     static_assert(std::is_same_v<B, int*>);
 }
 ```
-`std::decay_t` is useful when a generic utility needs to determine the type that would typically be stored from an argument passed by value.
-
-However, decay is not always desirable. If a function must preserve references, constness, or array information, applying decay indiscriminately can lose information.
+Here, `const int&` becomes `int`, while `int[5]` becomes `int*`. `std::decay_t` is useful when we want to determine the type that would normally be obtained when storing an argument by value.
 #### Compile-Time Validation with `static_assert`
-Type traits become particularly useful when combined with `static_assert`.
-
-A `static_assert` checks a compile-time Boolean condition. If the condition is false, the program fails to compile.
+Type traits become more useful when combined with `static_assert`. It allows us to check a condition during compilation. If the condition is false, the compiler stops and reports an error.
 
 For example:
 ```cpp
@@ -412,13 +399,12 @@ T doubleValue(T value) {
     return value * 2;
 }
 ```
-The function is intended for arithmetic types, such as integers and floating-point values. If someone instantiates it with an unsupported type, the assertion provides a diagnostic explaining the requirement.
+Here, `static_assert` checks whether `T` is an arithmetic type, such as an integer or a floating-point type. If we try to use the function with an unsupported type, compilation fails and the compiler displays the provided error message.
 
-A `static_assert` does not make an unsupported operation valid. It provides an explicit compile-time check that communicates the intended restriction.
+This allows us to set clear rules for template types and catch invalid types before the program runs.
 #### Selecting Types with `std::conditional_t`
-Sometimes a template needs to select one of two types depending on a compile-time condition.
+Sometimes, we need a template to choose between two types depending on a condition. C++ provides `std::conditional_t` to make this selection during compilation.
 
-For this purpose, C++ provides `std::conditional_t`.
 ```cpp
 #include <type_traits>
 
@@ -436,31 +422,27 @@ int main() {
     NumberType<false>::type b = 3.14;
 }
 ```
-The condition determines which type is selected:
-- `NumberType<true>::type` is `int`.
-- `NumberType<false>::type` is `double`.
+Here, if the condition is `true`, the selected type is `int`. If it is `false`, the selected type is `double`. The selection happens during compilation, not while the program is running.
 
-This is type selection rather than runtime selection. The chosen type must be determined during compilation.
-
-Type traits and conditional types allow generic code to inspect types and adapt its implementation. However, selecting a type does not automatically guarantee that every operation on that type is valid. We still need a way to control which template implementations can be instantiated.
+Type traits and conditional types help us inspect types and adapt templates to different types. However, selecting a type does not guarantee that every operation on it is valid. We also need a way to control which types are allowed to use a template.
 
 ### Template Constraints and Conditional Instantiation
-Consider the following template:
+Consider a generic function that calls the `size()` member function on the given value. Since templates can accept different types, we need to make sure that the provided type supports the operations used inside the function.
 ```cpp
 template <typename T>
 auto calculate(T value) {
     return value.size();
 }
 ```
-This function works for types that provide a suitable `size()` member, such as `std::string` and `std::vector`. It does not work for an ordinary integer.
+This function works with types that provide a `size()` member function, such as `std::string` and `std::vector`. However, it does not work with types like `int`, because integers do not have a `size()` function.
 
-When an unsupported type is supplied, the compiler attempts to instantiate the function and encounters an invalid expression.
+When we use an unsupported type, the compiler encounters an invalid expression during template instantiation and reports an error.
 
-**Template constraints make the requirements of generic code explicit.** They help control which implementations participate in overload resolution and provide clearer diagnostics when an argument does not satisfy the intended interface.
+**Template constraints allow us to define what a type must support before a template can be used.** They help control which functions are available for different types and prevent templates from being used with unsupported types.
 #### Template Substitution and SFINAE
-SFINAE stands for **Substitution Failure Is Not An Error**. When the compiler tries to use a template with specific types, it may find that those types do not work with the template's declaration. Instead of producing an error, the compiler simply ignores that template as a possible match. This allows us to make templates available only for certain types.
+When working with templates, we may want to allow a function to accept only certain types. C++ provides a technique called **SFINAE**, which stands for **Substitution Failure Is Not An Error**. It allows the compiler to ignore a template when the provided type does not satisfy its requirements, instead of immediately producing an error.
 
-For example, consider a template that should accept only integral types:
+For example, consider a function that should accept only integral types, such as `int`, `char`, and `long`.
 ```cpp
 #include <type_traits>
 #include <iostream>
@@ -479,23 +461,16 @@ int main() {
     process(42);
 }
 ```
-The expression:
-```cpp
-std::enable_if_t<std::is_integral_v<T>>
-```
-provides a valid type when the condition is true. When the condition is false, the substitution fails.
+Here, `std::enable_if_t` checks the condition `std::is_integral_v<T>`. If the condition is true, it provides a valid type and the template can be used. If the condition is false, substitution fails and the compiler ignores this template as a possible match.
 
-For example, an attempt to call `process(3.14)` would not find a viable overload in this program and it will fail to compile.
+For example, calling `process(3.14)` will fail because `double` is not an integral type. Since no suitable function is available, the compiler reports an error.
 #### The Detection Idiom
-Sometimes the requirement is not a built-in type property. Instead, we want to determine whether an expression is valid for a particular type.
+A template may need to check whether a type supports a specific operation rather than checking a built-in property. For example, we may want to know whether a type provides a `size()` member function before using it.
 
-For example, we may want to detect whether a type provides a `size()` member.
-
-In modern C++, this can be expressed directly using a `requires` expression. Before C++20, libraries commonly used detection idioms based on `std::void_t` and substitution.
-
-Here is a traditional implementation:
+Before C++20, this was commonly done using the detection idiom with `std::void_t`. Consider the following example:
 ```cpp
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 template <typename T, typename = void>
@@ -518,17 +493,17 @@ The important expression is:
 ```cpp
 decltype(std::declval<const T&>().size())
 ```
-`std::declval` allows us to form an expression involving a hypothetical value of type `T` without constructing an actual object.
+`std::declval` allows us to use a hypothetical value of type `T` without creating an actual object. This lets us check whether calling `size()` on that type is valid.
 
-`decltype` obtains the type of the expression. If the expression is valid, `std::void_t` becomes `void`, allowing the specialization to match. If substitution fails, the primary template remains applicable.
+`decltype` obtains the type of the expression, while `std::void_t` converts a valid type into `void`. If the expression is valid, the specialization is selected and `HasSize` inherits from `std::true_type`. Otherwise, the primary template is used and `HasSize` inherits from `std::false_type`.
 
-The result is a trait that detects the existence of a suitable `size()` expression.
-### Concepts and `requires` Clauses
-A **concept** names a set of requirements that a type or expression must satisfy. Instead of encoding a condition indirectly through `enable_if`, we can describe the requirement directly.
+#### Concepts and `requires` Clauses
+C++20 introduced **concepts** to make template constraints easier to write and understand. A concept defines a set of requirements that a type must satisfy before it can be used with a template.
 
-For example:
+For example, we can define a concept that accepts only arithmetic types:
 ```cpp
 #include <concepts>
+#include <type_traits>
 #include <iostream>
 
 template <typename T>
@@ -544,15 +519,9 @@ int main() {
     std::cout << doubleValue(2.5) << '\n';
 }
 ```
-The concept `Arithmetic` describes the permitted category of types.
+Here, `Arithmetic` is a concept that checks whether a type is arithmetic, such as `int`, `float`, or `double`. The declaration `template <Arithmetic T>` requires the type `T` to satisfy this concept before the function can be used.
 
-The declaration:
-```cpp
-template <Arithmetic T>
-```
-requires `T` to satisfy that concept.
-
-An equivalent spelling is:
+We can write the same constraint using a `requires` clause:
 ```cpp
 template <typename T>
     requires Arithmetic<T>
@@ -560,11 +529,9 @@ T doubleValue(T value) {
     return value * 2;
 }
 ```
-Both forms constrain the template.
+Both forms express the same requirement. They prevent the function from being used with types that do not satisfy the `Arithmetic` concept.
 
-Concepts are more than named Boolean checks. They can also express requirements on the operations a type supports.
-
-Consider a generic function that requires addition:
+Concepts can also check whether a type supports specific operations, not just built-in properties. For example, consider a function that requires its arguments to support addition:
 ```cpp
 #include <concepts>
 
@@ -579,11 +546,9 @@ auto addValues(T a, T b) {
     return a + b;
 }
 ```
-The `requires` expression checks whether `a + b` is a valid expression for the supplied type.
-
-This is particularly useful when designing generic algorithms because the constraint describes the actual operation the implementation needs.
+Here, the `requires` expression checks whether the expression `a + b` is valid for the given type. If the operation is supported, the type satisfies the `Addable` concept and can be used with the function.
 #### Combining and Composing Concepts
-Concepts can be combined to describe more specific requirements.
+Concepts can be combined using logical operators to define more specific requirements. For example, we can create a concept that accepts both integral and floating-point types.
 ```cpp
 #include <concepts>
 
@@ -597,7 +562,7 @@ T square(T value) {
     return value * value;
 }
 ```
-The `Numeric` concept accepts integral and floating-point types. Concepts can also express multiple simultaneous requirements:
+Here, the `Numeric` concept accepts types that satisfy either `std::integral` or `std::floating_point`. We can also use a `requires` expression to check whether a type supports multiple operations.
 ```cpp
 template <typename T>
 concept NumericLike =
@@ -606,11 +571,9 @@ concept NumericLike =
         a * b;
     };
 ```
-Here, the type must support both addition and multiplication.
-
-The expressions inside a `requires` expression are checked for validity; they are not executed as runtime operations.
-### Constrained Overloads
-Sometimes different types need different implementations. Consider a function that distinguishes integral types from other arithmetic types:
+Here, the type must support both addition and multiplication. The expressions inside `requires` are only checked during compilation. They are not executed when the program runs.
+#### Constrained Overloads
+Concepts can also be used with function overloading to provide different implementations depending on the type of the arguments. For example, we can create one function for integral types and another for floating-point types.
 ```cpp
 #include <concepts>
 #include <iostream>
@@ -630,20 +593,21 @@ int main() {
     describe(3.14);
 }
 ```
-Both templates have the same function name, but their constraints distinguish the intended argument categories.
+Both functions have the same name, but their concepts define different requirements. When we call `describe(10)`, the integral version is selected. When we call `describe(3.14)`, the floating-point version is selected.
+
+This allows us to use the same function name while providing different implementations for different types.
 ## Compile-Time Programming and Metaprogramming
+
 ### Introduction
-Normally, a function executes when the program runs. Its instructions operate on values available during execution.
+Normally, functions execute when the program runs. Their instructions operate on values during execution.
 
-However, some computations can be performed during compilation.
+C++ also allows us to perform computations during compilation, before the program starts. This can reduce runtime work and allow the compiler to detect errors earlier.
 
-For example, a mathematical constant or a fixed configuration value may be known before the program starts. Computing such values at compile time can eliminate unnecessary runtime work and enable compile-time validation.
+For example, fixed values and mathematical calculations can be computed during compilation instead of waiting until the program runs.
 ### Constant Expressions and `constexpr`
-A constant expression is an expression that can be evaluated during compilation where the language requires or permits one.
+A constant expression is an expression whose value can be determined during compilation. C++ provides the `constexpr` keyword to allow variables and functions to be used in constant expressions.
 
-The `constexpr` keyword allows a function to be evaluated at compile time when its arguments and operations satisfy the constant-expression rules.
-
-Consider:
+Consider the following example:
 ```cpp
 #include <iostream>
 
@@ -657,18 +621,19 @@ int main() {
     std::cout << result << '\n';
 }
 ```
-Because `result` is declared `constexpr`, its initializer must be a constant expression. The compiler evaluates `square(5)` at compile time.
+Here, `square()` is declared with `constexpr`, which allows it to be evaluated during compilation. Since `result` is also declared `constexpr`, its value must be known at compile time. The compiler evaluates `square(5)` and stores the result.
 
-However, a `constexpr` function is not restricted to compile-time execution.
+However, a `constexpr` function can also execute at runtime when its arguments are not constant expressions.
 ```cpp
-int value = 10;
+int value ;
+cin >> value;
 int result = square(value);
 ```
-Here, `value` is not a constant expression, so the call is evaluated at runtime.
+Here, `value` is determined during execution, so the function call is evaluated at runtime.
 ### Static Initialization with `constinit`
-Sometimes, a variable must be initialized before program execution reaches `main()`, without relying on dynamic initialization.
+C++20 introduced `constinit` to guarantee that a variable with static or thread storage duration is initialized during static initialization, before normal program execution begins.
 
-C++20 introduced `constinit` to guarantee static initialization for variables with static or thread storage duration.
+Consider the following example:
 ```cpp
 constinit int counter = 0;
 
@@ -676,9 +641,9 @@ int main() {
     counter = 10; // OK
 }
 ```
-The variable `counter` is initialized statically, but it can still be modified at runtime. Unlike `constexpr`, `constinit` does not make the variable constant.
+Here, `counter` is initialized before `main()` starts. However, it can still be modified while the program runs. Unlike `constexpr`, `constinit` does not make a variable constant.
 
-For example:
+Consider another example:
 ```cpp
 int getValue() {
     return 42;
@@ -686,13 +651,13 @@ int getValue() {
 
 // constinit int value = getValue(); // Ill-formed
 ```
-The initializer requires a function call that cannot be evaluated as a constant expression, so it cannot satisfy the static initialization requirement.
+The function `getValue()` is not a constant expression because it is not declared `constexpr` or `consteval`. Therefore, its result cannot be used to satisfy the initialization requirement of `constinit`.
 
-Use `constinit` when a variable must be initialized statically but still needs to remain mutable at runtime. Use `constexpr` when the variable must also be a constant expression.
+Use `constinit` when a variable must be initialized statically but still needs to be modified at runtime. Use `constexpr` when a variable must also be a compile-time constant.
 ### Immediate Functions with `consteval`
-Sometimes compile-time evaluation is not merely an optimization. It is a requirement of the interface.
+A function may need to be evaluated exclusively during compilation rather than at runtime. C++20 introduced the `consteval` keyword to enforce this requirement.
 
-C++20 introduced `consteval` for immediate functions
+Consider the following example:
 ```cpp
 consteval int cube(int value) {
     return value * value * value;
@@ -702,7 +667,7 @@ int main() {
     constexpr int result = cube(3);
 }
 ```
-The call to `cube(3)` must be evaluated at compile time. Unlike `constexpr`, `consteval` does not permit an ordinary runtime call using a value known only during execution.
+Here, `cube()` is an immediate function. Every call to this function must be evaluated at compile time.
 
 For example:
 ```cpp
@@ -710,13 +675,14 @@ int value = 3;
 
 // int result = cube(value); // Ill-formed
 ```
-The argument is not a constant expression suitable for this immediate invocation.
+This call is not allowed because `value` is determined at runtime. The compiler requires the arguments to be constant expressions so that the function can be evaluated during compilation.
 
-Use `constexpr` when compile-time evaluation is possible and runtime evaluation remains useful. Use `consteval` when the function must enforce compile-time evaluation.
+The main difference is that `constexpr` allows both compile-time and runtime evaluation, while `consteval` requires compile-time evaluation.
+
 ### Compile-Time Dispatch with `if constexpr`
-Consider a generic function that behaves differently depending on the type of its argument.
+In generic programming, we may want a function to behave differently depending on the type it receives. C++17 introduced `if constexpr` to select a branch during compilation.
 
-One approach is to use ordinary conditional logic:
+Consider an ordinary conditional statement:
 ```cpp
 if (condition) {
     // ...
@@ -724,9 +690,9 @@ if (condition) {
     // ...
 }
 ```
-However, a normal `if` does not generally discard either branch during template instantiation. Both branches must be valid for the instantiated function, even if the condition is a compile-time constant.
+A normal `if` checks its condition at runtime. Even when the condition is known during compilation, both branches must be valid when a template is instantiated.
 
-`if constexpr`, introduced in C++17, solves this problem by discarding the non-selected branch during instantiation when the condition is a constant expression.
+`if constexpr` solves this problem by evaluating the condition during compilation and discarding the branch that is not selected.
 ```cpp
 #include <iostream>
 #include <type_traits>
@@ -745,9 +711,9 @@ int main() {
     describe(3.14);
 }
 ```
-When `T` is `int`, the integral branch is selected. When `T` is `double`, the other branch is selected.
+Here, the compiler checks whether `T` is an integral type. When `T` is `int`, the first branch is selected. When `T` is `double`, the second branch is selected. The unused branch is discarded during template instantiation.
 
-The distinction becomes more important when the branches contain operations that are valid for different types.
+This becomes particularly useful when different types support different operations.
 
 For example:
 ```cpp
@@ -763,9 +729,13 @@ void inspect(T value) {
     }
 }
 ```
-The pointer-specific behavior is instantiated only when the condition selects that branch.
+Here, the compiler checks whether `T` is a pointer. If it is, the pointer-specific branch is selected. Otherwise, the second branch is used.
+
+This allows us to write one generic function with different implementations for different types without requiring every branch to be valid for every type.
 ### Template Metaprogramming
-**Template metaprogramming** uses C++ templates to perform computations at compile time. A classic example is calculating a factorial using recursive template instantiation:
+**Template metaprogramming** is a technique that uses C++ templates to perform computations during compilation. Templates can recursively instantiate other templates to calculate values or generate types.
+
+A classic example is calculating a factorial using recursive template instantiation:
 ```cpp
 template <unsigned int N>
 struct Factorial {
@@ -783,14 +753,11 @@ int main() {
     static_assert(Factorial<5>::value == 120);
 }
 ```
-**How it works:**
-- **Recursive case:** `Factorial<N>` calculates `N * Factorial<N - 1>::value`.
-- **Base case:** `Factorial<0>` returns `1`, stopping the recursion.
-- **Compile-time evaluation:** The compiler instantiates the required templates until it reaches the base case, producing the result `120`.
+The `Factorial` template calculates the result by multiplying `N` by the factorial of `N - 1`. This continues until the compiler reaches the specialization `Factorial<0>`, which provides the base value `1` and stops the recursion.
 
-This technique demonstrates how templates can express computations that are resolved during compilation.
+The compiler instantiates the required templates and calculates the result during compilation. The `static_assert` then checks that the result is equal to `120`.
 
-However, modern C++ offers a simpler alternative for many compile-time calculations: `constexpr` functions.
+Although this technique demonstrates how templates can perform compile-time calculations, modern C++ provides a simpler alternative for many computations: `constexpr` functions.
 ```cpp
 constexpr unsigned long long factorial(unsigned int n) {
     unsigned long long result = 1;
@@ -804,12 +771,15 @@ constexpr unsigned long long factorial(unsigned int n) {
 
 static_assert(factorial(5) == 120);
 ```
+Here, the `constexpr` function calculates the factorial using a loop. Since the argument is a constant expression, the compiler evaluates the function during compilation. The `static_assert` checks the result.
 
-Here, `constexpr` allows the function to be evaluated at compile time when its arguments permit it. The `static_assert` verifies the result during compilation.
+This approach is easier to read and maintain than recursive template instantiation. Loop-based `constexpr` functions require C++14 or later.
 ### Type-Level Programming
-Templates can compute types as well as values. For example, `std::conditional_t` selects a type based on a compile-time condition, while `std::remove_reference_t` transforms a type.
+Templates can perform computations on types, not just values. This is called **type-level programming**. Instead of calculating a number, the compiler selects or transforms a type during compilation.
 
-We can combine these facilities to define a type-level decision:
+For example, `std::conditional_t` selects between two types, while `std::remove_reference_t` removes a reference from a type.
+
+We can combine these facilities to create a type-level decision:
 ```cpp
 #include <type_traits>
 
@@ -830,10 +800,11 @@ int main() {
     static_assert(std::is_same_v<B, double*>);
 }
 ```
-For a non-pointer type, the resulting type is a pointer to that type. For a pointer type, the original type is retained. The compiler performs this type selection without constructing runtime objects.
+Here, the compiler checks whether `T` is a pointer type. If it is, the original type is selected. Otherwise, a pointer to that type is selected.
+
+For example, `StorageType<int>::type` produces `int*`, while `StorageType<double*>::type` remains `double*`.
 
 ## Tasks
-
 ### Task 1: 
 Write a C++ program to implement a generic data-processing utility using function templates, multiple template parameters, and template argument deduction.
 
@@ -961,7 +932,6 @@ The program should:
 
 **Hint:** Use function templates, class templates, `std::common_type_t`, concepts, `if constexpr`, `constexpr`, and `static_assert`.
 ### Task 8: 
-
 Write a C++ program to build a reusable type-validation framework using type traits, concepts, specialization, and compile-time checks.
 
 The program should:

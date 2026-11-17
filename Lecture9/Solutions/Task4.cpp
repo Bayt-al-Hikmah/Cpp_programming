@@ -1,77 +1,126 @@
+#include <concepts>
 #include <iostream>
 #include <string>
-#include <utility>
+#include <type_traits>
+#include <vector>
 
-// 1. Log an arbitrary number of values.
-template <typename... Args>
-void logValues(const Args&... args){
-    ((std::cout << args << ' '), ...);
-    std::cout << '\n';
-}
-
-// 2. Sum any number of values.
-// The initial value allows an empty argument pack.
-template <typename... Args>
-auto sumValues(const Args&... args){
-    return (0 + ... + args);
-}
-
-// 3. Count the arguments.
-template <typename... Args>
-constexpr std::size_t countArguments(const Args&...){
-    return sizeof...(Args);
-}
-
-// 4. Check whether every argument is positive.
-template <typename... Args>
-constexpr bool allPositive(const Args&... args){
-    return ((args > 0) && ...);
-}
-
-// 5. Product of an arbitrary number of values.
-// The empty product is defined as 1.
-template <typename... Args>
-auto productValues(const Args&... args){
-    return (1 * ... * args);
-}
-
-// 6. A function that receives one value.
+// C++20 concept used by the concept-based square function.
 template <typename T>
-void printOne(const T& value){
-    std::cout << value << ' ';
+concept Arithmetic = std::is_arithmetic_v<T>;
+
+// 1. SFINAE version: substitution removes this overload for non-arithmetic T.
+template <typename T,
+          std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+constexpr T calculateSquareSFINAE(T value)
+{
+    return value * value;
 }
 
-// 7. Demonstrate forwarding a parameter pack.
-template <typename... Args>
-void forwardToPrintOne(const Args&... args){
-    (printOne(args), ...);
-    std::cout << '\n';
+// 2. C++20 concept-based equivalent.
+template <Arithmetic T>
+constexpr T calculateSquare(T value)
+{
+    return value * value;
 }
 
-int main(){
-    logValues(10, 3.14, "hello", std::string("C++"));
+// 3. Require multiplication to be a valid operation.
+template <typename T>
+concept Multipliable = requires(const T& left, const T& right)
+{
+    left * right;
+};
 
-    std::cout << "Sum: " << sumValues(10, 20, 3.5) << '\n';
+template <Multipliable T>
+auto calculateProduct(const T& left, const T& right)
+{
+    return left * right;
+}
 
-    std::cout << "Empty sum: " << sumValues() << '\n';
+// 4. A type has size() if the expression is valid and size-like.
+template <typename T>
+concept HasSize = requires(const T& value)
+{
+    { value.size() } -> std::convertible_to<std::size_t>;
+};
 
-    std::cout << "Argument count: " << countArguments(10, 2.5, "test") << '\n';
+template <HasSize T>
+std::size_t getSize(const T& value)
+{
+    return static_cast<std::size_t>(value.size());
+}
 
-    std::cout << std::boolalpha;
+// 5. Constrained overloads select a description based on the value type.
+template <std::integral T>
+void describeType(T value)
+{
+    std::cout << value << " is an integral type\n";
+}
 
-    std::cout << "All positive: " << allPositive(1, 2, 3.5) << '\n';
+template <std::floating_point T>
+void describeType(T value)
+{
+    std::cout << value << " is a floating-point type\n";
+}
 
-    std::cout << "Contains non-positive value: " << allPositive(1, -2, 3) << '\n';
+// Additional challenge: a container with size() and numeric indexed values.
+template <typename C>
+concept NumericContainer = HasSize<C> && requires(const C& container,
+                                                   std::size_t index)
+{
+    container[index];
+    requires std::is_arithmetic_v<
+        std::remove_cvref_t<decltype(container[index])>>;
+    // A character sequence such as std::string is not treated as a
+    // numeric container merely because char is an arithmetic type.
+    requires (!std::same_as<
+        std::remove_cvref_t<decltype(container[index])>, char>);
+};
 
-    // Empty conjunction is true.
-    std::cout << "Empty allPositive: " << allPositive() << '\n';
+template <NumericContainer C>
+double sumElements(const C& values)
+{
+    double total = 0.0;
+    for (std::size_t i = 0; i < values.size(); ++i)
+    {
+        total += static_cast<double>(values[i]);
+    }
+    return total;
+}
 
-    std::cout << "Product: " << productValues(2, 3, 4) << '\n';
+int main()
+{
+    std::cout << "SFINAE square of 5: "
+              << calculateSquareSFINAE(5) << '\n';
 
-    std::cout << "Empty product: " << productValues() << '\n';
+    std::cout << "Concept square of 2.5: "
+              << calculateSquare(2.5) << '\n';
 
-    std::cout << "Forwarded values: ";
-    forwardToPrintOne(10, 2.5, "world");
+    std::cout << "Product of 6 and 7: "
+              << calculateProduct(6, 7) << '\n';
+
+    const std::string word = "templates";
+    const std::vector<int> numbers{2, 4, 6, 8};
+
+    std::cout << "String length: " << getSize(word) << '\n';
+    std::cout << "Vector size: " << getSize(numbers) << '\n';
+
+    describeType(42);
+    describeType(3.14);
+
+    std::cout << "Sum of vector elements: "
+              << sumElements(numbers) << '\n';
+
+    // Compile-time checks document which types satisfy each concept.
+    static_assert(Arithmetic<int>);
+    static_assert(Arithmetic<double>);
+    static_assert(!Arithmetic<std::string>);
+    static_assert(Multipliable<int>);
+    static_assert(!Multipliable<std::string>);
+    static_assert(HasSize<std::string>);
+    static_assert(HasSize<std::vector<int>>);
+    static_assert(!HasSize<int>);
+    static_assert(NumericContainer<std::vector<int>>);
+    static_assert(!NumericContainer<std::string>);
 
     return 0;
 }

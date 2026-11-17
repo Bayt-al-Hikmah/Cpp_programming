@@ -1,11 +1,10 @@
-## Objectives
-- Understand the basics of multithreading and create and join threads using `std::thread`.
-- Recognize data races and protect shared data using `std::mutex` and `std::lock_guard`.
-- Coordinate threads using `std::condition_variable`.
-- Execute asynchronous operations and exchange results using `std::async`, `std::future`, and `std::promise`.
-- Select appropriate I/O and concurrency mechanisms according to the requirements of a program.
+# Concurrency and Multithreading
 
-
+## Learning Objectives
+- Create and manage threads and understand why their lifetimes matter.
+- Recognize data races and protect shared state with mutexes.
+- Coordinate threads using condition variables.
+- Use `std::async`, `std::future`, and `std::promise` to exchange results.
 ## Concurrency & Multithreading
 ### Introduction
 Many programs execute a sequence of operations: read some data, process it, and display or save the result. For simple tasks, performing these operations one after another is often sufficient.
@@ -819,3 +818,39 @@ There is another important case: what happens if the producer disappears without
 Suppose a promise is destroyed while its shared state is still waiting for a value or exception. The shared state is then made ready with a `std::future_error` indicating a broken promise. Consequently, a consumer waiting on the associated future will not remain blocked indefinitely solely because the producer failed to fulfill the promise.
 
 This behavior helps prevent consumers from waiting forever when a producer fails to complete its responsibility.
+
+## Tasks
+
+### Task 1: Parallel Sum
+
+Write a program that sums a large vector of integers using four worker threads.
+
+1. Create and fill a vector with integer values.
+2. Divide the index range into four non-overlapping parts.
+3. Let each thread calculate one partial sum and store it in a separate result slot.
+4. Join every thread before combining and displaying the partial sums.
+5. Compare the parallel result with a sequential sum.
+
+**Requirements:** Do not let multiple threads write to the same result slot. Handle vectors whose size is not evenly divisible by four.
+
+### Task 2: Thread-Safe Counter
+
+Create a `Counter` class that stores an integer value and provides an `increment()` operation.
+
+1. Protect the counter with a `std::mutex`.
+2. Start several threads, each of which increments the counter many times.
+3. Join all threads and display the final value.
+4. Explain why the counter must be protected and why `std::lock_guard` is preferable to manually calling `lock()` and `unlock()`.
+
+### Task 3: Wait for a Result
+
+Create one producer thread and one consumer thread that exchange a single integer.
+
+1. Share a `std::mutex`, a `std::condition_variable`, an integer value, and a Boolean flag.
+2. The producer stores the integer while holding the mutex, updates the flag, and notifies the consumer.
+3. The consumer waits with a predicate that checks the flag, then reads the value while holding the mutex.
+4. Join both threads and display the received value.
+5. Explain why the consumer must use a predicate instead of assuming every notification means the condition is true.
+
+**Hint:** Include `<condition_variable>`, `<mutex>`, and `<thread>`. Keep all shared variables alive until both threads have finished.
+

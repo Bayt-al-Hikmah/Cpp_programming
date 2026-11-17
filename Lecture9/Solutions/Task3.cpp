@@ -37,14 +37,14 @@ auto productValues(const Args&... args){
 
 // 6. A function that receives one value.
 template <typename T>
-void printOne(const T& value){
-    std::cout << value << ' ';
+void printOne(T&& value){
+    std::cout << std::forward<T>(value) << ' ';
 }
 
-// 7. Demonstrate forwarding a parameter pack.
+// 7. Demonstrate perfect forwarding of a parameter pack.
 template <typename... Args>
-void forwardToPrintOne(const Args&... args){
-    (printOne(args), ...);
+void forwardToPrintOne(Args&&... args){
+    (printOne(std::forward<Args>(args)), ...);
     std::cout << '\n';
 }
 

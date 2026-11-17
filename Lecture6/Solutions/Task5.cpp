@@ -1,58 +1,57 @@
-#include <iostream>
-#include <string>
-#include <optional>
-#include <expected>
 #include <cassert>
+#include <cmath>
+#include <expected>
+#include <iostream>
+#include <optional>
+#include <string>
 
-std::expected<double, std::string> convertToNumber(const std::string& input){
-    if (input.empty())
+std::expected<double, std::string> convertToNumber(const std::string& input) {
+    if (input.empty()) {
         return std::unexpected("Input cannot be empty.");
+    }
 
-    double number;
-    try{
-        number = stoi(input);
+    try {
+        std::size_t processed = 0;
+        const double number = std::stod(input, &processed);
+        if (processed != input.size() || !std::isfinite(number)) {
+            return std::unexpected("Enter one complete, finite number.");
+        }
+        return number;
+    } catch (const std::invalid_argument&) {
+        return std::unexpected("Input does not contain a valid number.");
+    } catch (const std::out_of_range&) {
+        return std::unexpected("The number is outside the supported range.");
     }
-    catch(...){
-        return std::unexpected("Failed to convert");
-    }
-    
-    return number;
 }
 
-std::optional<double> validateRange(double number){
-    if (number < 0 || number > 100)
+std::optional<double> validateRange(double number) {
+    if (number < 0.0 || number > 100.0) {
         return std::nullopt;
-
+    }
     return number;
 }
 
-int main(){
-    static_assert(100 >= 0, "The maximum must be non-negative.");
-
+int main() {
     std::string input;
-
     std::cout << "Enter a number between 0 and 100: ";
-    std::cin >> input;
-
-    auto result = convertToNumber(input);
-
-    if (!result){
-        std::cout << "Error: " << result.error() << '\n';
+    if (!(std::cin >> input)) {
+        std::cerr << "No input was provided.\n";
         return 1;
     }
 
-    double number = result.value();
-
-    assert(number == number); // Verify that the number is not NaN.
-
-    auto validNumber = validateRange(number);
-
-    if (!validNumber){
-        std::cout << "Error: Number must be between 0 and 100.\n";
+    const auto converted = convertToNumber(input);
+    if (!converted) {
+        std::cerr << "Conversion error: " << converted.error() << '\n';
         return 1;
     }
 
-    std::cout << "Converted number: " << validNumber.value() << '\n';
+    const auto validated = validateRange(*converted);
+    if (!validated) {
+        std::cerr << "The number must be between 0 and 100.\n";
+        return 1;
+    }
 
-    return 0;
+    assert(*validated >= 0.0 && *validated <= 100.0);
+    static_assert(100 >= 0, "The upper bound must be non-negative.");
+    std::cout << "Converted number: " << *validated << '\n';
 }

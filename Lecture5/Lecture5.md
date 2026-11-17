@@ -1,14 +1,11 @@
-## Objectives :
-- Understand the principles of Object-Oriented Programming (OOP).
-- Apply encapsulation and access specifiers (`public`, `private`, and `protected`) to control access to class members.
-- Initialize and manage objects using constructors, destructors, and the `this` pointer.
-- Work with static members, getters, setters, and `const` member functions.
-- Overload operators to define meaningful operations for user-defined types.
-- Understand function overloading, function overriding, and the role of friend functions and classes.
-- Apply inheritance to reuse and extend existing classes, including multiple and virtual inheritance.
-- Implement runtime polymorphism using virtual functions, abstract classes, and interfaces.
-- Understand object copying, shallow and deep copying, copy and move semantics, and the Rule of Three, Rule of Five, and Rule of Zero.
-- Use namespaces to organize identifiers and prevent naming conflicts in C++ programs.
+# Classes, Objects, and Object-Oriented Programming
+
+## Learning Objectives
+- Design classes with private data and a clear public interface.
+- Use constructors, destructors, member functions, and static members.
+- Overload operators when the meaning is natural and unsurprising.
+- Apply inheritance, virtual functions, abstract classes, and polymorphism.
+- Understand copying and the Rule of Zero, Three, and Five.
 ## Object-Oriented Programming in C++
 ### Introduction
 In the last lecture, we explored **functional programming** and how it helps us organize a program into smaller, reusable functions, with each function responsible for a particular task. This approach works well for many problems, but as programs become larger, we sometimes need a different way to organize our code.
@@ -51,13 +48,13 @@ Here, `name` is a data member, while `talk()` is a member function. The `public`
 
 Inside `main()`, we create an object named `mycat` using the class name `Cat`. We then use the dot operator (`.`) to access its members. When we write `mycat.name`, we access the object's name, and when we write `mycat.talk()`, we call its function.
 
-There is one important detail to notice: in C++, **class members are private by default**. In our example, we explicitly wrote `public` because we wanted to access the members from `main()`. Without an access specifier, members declared inside a `class` are private.
+There is one important detail to notice: in C++, **class members are private by default**. In our example, we explicitly wrote `public` because we wanted to access the members from `main()`. 
 ### Access Specifiers and Encapsulation
 Not every piece of data should be accessible from everywhere in a program. Consider a bank account whose balance is stored in a variable. If any part of the program could directly change that balance, someone could accidentally assign a negative value or bypass the withdrawal rules. To prevent this, C++ provides three main access specifiers: `public`, `private`, and `protected`.
 
-A `public` member can be accessed from anywhere the object or class is accessible, subject to the normal rules of C++. It is useful for functions and other members that form the class's interface.
+A `public` member can be accessed from anywhere the object or class is accessible, subject to the normal rules of C++.
 
-A `private` member can be accessed directly only by member functions and other authorized entities of the same class. Code outside the class cannot access it directly, and a derived class cannot access it directly either.
+A `private` member can be accessed directly only by member functions and other authorized entities of the same class. Code outside the class cannot access it directly.
 
 A `protected` member is similar to a private member, but it can also be accessed by derived classes, subject to the inheritance access rules. 
 
@@ -86,11 +83,11 @@ int main() {
     return 0;
 }
 ```
-This is an example of **encapsulation**: we keep data and the operations that work on it together, while controlling how the internal state can be accessed or modified.
+Here, `radius` is private, while `getArea()` is public. This means that we cannot directly access or modify `radius` from outside the class. Instead, we must use the public methods provided by the class to interact with its internal data.
 
-Encapsulation is not simply about hiding variables. It also allows us to protect the rules that our objects must follow.
+This is an example of **encapsulation**: we keep data and the operations that work on it together while controlling how the internal state can be accessed or modified.
 
-For example, if a circle must have a positive radius, we can enforce that rule when an object is created and whenever its radius changes. Such a rule is called a **class invariant**: a condition that must remain true for an object to be valid.
+Encapsulation is not simply about hiding variables. It also allows us to protect the rules that our objects must follow and prevent invalid modifications to their internal data.
 ### Getters and Setters
 Sometimes, we want to allow users to read or modify a private member without exposing it directly. We can provide a getter to retrieve its value and a setter to change it.
 
@@ -205,11 +202,11 @@ public:
 ```
 Here, `name(n)` initializes `name` directly from `n`, and `age(a)` initializes `age` from `a`.
 
-This is not merely a different writing style. Initialization lists are especially important for members that cannot be assigned after construction, such as references and `const` data members. They are also necessary when a derived class needs to initialize its base class or when a member has no default constructor.
-
-There is one more detail: **members are initialized in the order in which they are declared in the class, not the order in which they appear in the initialization list.** For this reason, we should normally list them in declaration order.
+There is one important detail: **members are initialized in the order in which they are declared in the class, not the order in which they appear in the initialization list.** For this reason, we should normally list them in declaration order.
 ### The `this` Pointer
-When we work with constructors and member functions, we sometimes use parameter names that are identical to member names. Consider a class that stores a person's name:
+When we work with constructors and member functions, we sometimes use parameter names that are identical to member names. To avoid the conflict between the two variables C++ provide use `this` keyword   
+
+Consider a class that stores a person's name:
 ```cpp
 class Person {
 private:
@@ -226,16 +223,6 @@ Here, `name` refers to the constructor parameter, while `this->name` refers to t
 The `this` pointer is available inside non-static member functions and points to the current object on which the function is operating.
 
 For example, if we create `Person p1("Ali")` and then call a member function on `p1`, `this` refers to `p1` during that call.
-
-Although we can use `this->name = name`, the following version is usually better:
-```cpp
-Person(const string& name) : name(name) {}
-```
-The initialization list makes the intention clear and avoids assigning to a member after it has already been initialized.
-
-The `this` pointer is also useful when a member function needs to return the current object by reference, as we will see later when discussing assignment operators.
-
-One limitation is worth remembering: static member functions do not have a `this` pointer, because they belong to the class rather than to a particular object.
 ### Destructors and Object Lifetime
 We have seen how constructors prepare an object for use. At the other end of its lifetime, C++ provides destructors, which allow an object to perform cleanup before its lifetime ends.
 
@@ -270,21 +257,9 @@ int main() {
 ```
 When `cat` is created, its constructor runs. When execution leaves `main()`, the local object is destroyed automatically, and its destructor runs.
 
-This illustrates an important concept: **object lifetime**. A local object normally lives until execution leaves its scope. Dynamically allocated objects have a different lifetime and must be managed appropriately.
-
-For example:
-```cpp
-Cat* cat = new Cat("Mimi");
-
-cat->talk();
-
-delete cat;
-```
-The `new` expression dynamically allocates an object, and `delete` destroys that object and releases its allocated storage. We use `->` to access members through a pointer.
-
 Destructors are particularly useful when a class manages resources, such as files, locks, or dynamically allocated memory. For a class that only contains ordinary standard-library members, such as `std::string`, the compiler-generated destructor is often sufficient.
 ### Static Members:
-So far, every object has maintained its own data members. If we create three `Cat` objects, each has its own `name` and `age`.
+Every object  maintain its own data members. If we create three `Cat` objects, each has its own `name` and `age`.
 
 But what if we want to know how many `Cat` objects have been created? Storing that information separately in every object would not make sense. We need a value shared by all instances of the class. This is where **static data members** become useful.
 
@@ -323,8 +298,6 @@ The variable `count` is shared by all `Cat` objects. Each time a constructor run
 Notice that we define `count` outside the class using `Cat::count`. This is the traditional definition required for a non-inline static data member. In C++17 and later, we can alternatively declare it as `inline static int count = 0;` inside the class.
 
 The function `getCount()` is also static. A **static member function** can be called using the class name, as in `Cat::getCount()`, without creating an object.
-
-Since it does not operate on a particular instance, it cannot directly access non-static members such as an individual cat's name. It can, however, access the class's static members.
 ### Operator Overloading
 Suppose we have two objects representing points in a two-dimensional coordinate system. It would be convenient to write `p1 + p2` rather than call a function such as `addPoints(p1, p2)`.
 
@@ -366,10 +339,6 @@ int main() {
 When the compiler encounters `p1 + p2`, it uses the overloaded `operator+()` function. The current object provides the left operand, while `other` refers to the right operand.
 
 The `const Point&` parameter allows us to pass the other point without copying it, and the trailing `const` guarantees that the operation does not modify the left operand.
-
-We can overload arithmetic operators such as `+`, `-`, `*`, and `/` when they have a meaningful interpretation for our class. The same applies to comparison operators such as `==`, `!=`, `<`, and `>`.
-
-The important idea is not to overload every possible operator, but to make objects behave naturally and predictably.
 #### Comparison Operators
 For our `Point` class, we might decide that two points are equal when both coordinates are equal.
 
@@ -388,7 +357,6 @@ Point p3(1, 2);
 cout << (p1 == p2) << endl; // 1: true
 cout << (p1 == p3) << endl; // 0: false
 ```
-For these integer-valued coordinates, exact comparison is straightforward. When coordinates contain floating-point calculations, however, exact equality may not be appropriate because rounding can introduce small numerical differences.
 #### Assignment Operators and Copying Objects
 The assignment operator (`=`) allows us to copy the state of one existing object into another. Consider the following example:
 ```cpp
@@ -407,8 +375,6 @@ Point p2 = p1;  // Copy constructor
 p2 = p1;        // Copy assignment operator
 ```
 In the first case, `p2` is being created and initialized using the existing object `p1`, so the copy constructor is used. In the second case, `p2` already exists, and we are replacing its current state with the state of `p1`, so the copy assignment operator is used.  
-
-C++ allows us to define our own copy constructor and copy assignment operator to control how objects are copied. This becomes particularly important when a class manages resources such as dynamically allocated memory, because the default copying behavior may cause multiple objects to share the same resource unintentionally.
 
 The **copy constructor** controls how a new object is created from an existing object, while the **copy assignment operator** controls how an existing object receives the state of another object.
 ```cpp
@@ -484,7 +450,7 @@ int main() {
 ```
 When we write `cout << p1`, the overloaded `operator<<` function is called. It receives two arguments: the output stream, represented by `out`, and the `Point` object we want to print, represented by `p`. The function then writes the coordinates to the stream, producing `(4, 8)`.
 
-You might wonder why the function takes an `ostream&` as its first parameter. The type `ostream` represents an output stream, such as `cout`, which is used to send data to an output destination. We pass it by reference so that the function operates on the original stream rather than a copy. This also allows the function to work with other output streams, such as file streams.
+You might wonder why the function takes an `ostream&` as its first parameter. The type `ostream` represents an output stream, such as `cout`, which is used to send data to an output destination. 
 
 Notice that the function returns `ostream&` as well. This means it returns a reference to the same output stream it received. Returning the stream allows us to chain multiple output operations in a single statement.
 
@@ -496,8 +462,6 @@ C++ evaluates this expression from left to right in terms of the chained stream 
 
 There is another important detail in our implementation: the `operator<<` function is declared using the keyword `friend`.
 
-Normally, a class's private members can only be accessed directly by its member functions and by other specifically authorized entities. In our example, the coordinates `x` and `y` are private, so an ordinary external function cannot access `p.x` or `p.y`.
-
 The keyword `friend` allows a function defined outside the class to access its private and protected members. In our example:
 ```cpp
 friend ostream& operator<<(ostream& out, const Point& p) {
@@ -507,23 +471,11 @@ friend ostream& operator<<(ostream& out, const Point& p) {
 ```
 By declaring `operator<<` as a friend, we allow it to access `p.x` and `p.y` directly, even though they are private.
 
-Why not make `operator<<` a member function of `Point`?
-
-The expression:
-```
-cout << p1;
-```
-is equivalent to calling an operator function with `cout` as the left operand and `p1` as the right operand.
-
-If we overloaded `operator<<` as a member function of `Point`, the left operand would need to be a `Point` object, because member operators are called on their owning object. But here, the left operand is `cout`, which is an output stream, not a `Point`.
-
-Therefore, we implement the operator as a non-member function and declare it as a friend so it can access the private coordinates.
-
 One final detail: **a friend function is not a member function of the class**, even when its definition appears inside the class declaration. The `friend` keyword simply grants it access to private and protected members. It does not make the function a member of the class.
 #### Member and Non-Member Operators
 When overloading operators, we can implement them either as member functions or as non-member functions. Both approaches allow us to define how operators behave with our objects, but the main difference is how the operands are passed to the function.
 
-When an operator is implemented as a member function, the left operand is the object on which the function is called. For example, consider the following implementation of operator+ inside the Point class:
+When an operator is implemented as a member function, the left operand is the object on which the function is called. For example, consider the following implementation of `operator+` inside the Point class:
 ```cpp
 Point operator+(const Point& other) const {
     return Point(x + other.x, y + other.y);
@@ -548,12 +500,8 @@ In this version, the function is not part of the Point class. Instead, both oper
 
 The expression `p1 + p2` now calls `operator+(p1, p2)`. The result is the same, but the function is called differently.
 
-Notice that this example uses `getX()` and `getY()` to access the coordinates. Since `x` and `y` are private, a non-member function cannot access them directly. We could instead declare the function as a friend of Point, allowing it to access the private members without using getters.
-
-So, when should we choose one approach over the other? Member functions are appropriate when the left operand should be an object of our class. Non-member functions can be useful when both operands should be treated equally or when the left operand belongs to another type.
+Notice that this example uses `getX()` and `getY()` to access the coordinates. Since `x` and `y` are private, a non-member function cannot access them directly. 
 #### Friend Functions and Friend Classes
-We have already seen that private members cannot normally be accessed by code outside a class. This is an important protection, but sometimes a function needs access to those members to perform a useful operation. C++ provides the `friend` keyword for this purpose.
-
 A **friend function** is a non-member function that is granted access to a class's private and protected members. A **friend class** grants the same kind of access to all member functions of another class.
 
 Consider our `Point` class again. We want to print its coordinates using `operator<<`, but the coordinates are private.
@@ -602,17 +550,14 @@ public:
 };
 ```
 The `Mechanic` class can access the private members of `Engine` because it has been declared a friend.
-
-Friendship should be used selectively. It provides a controlled exception to access restrictions, but excessive friendship can make a class's implementation more difficult to maintain because more code becomes dependent on its internal representation.
 ### Inheritance
-So far, we have created classes that define their own data and functions. But imagine that we want to represent several kinds of animals in a program: cats, dogs, birds, and other pets.
+Imagine that we want to represent several kinds of animals in a program: cats, dogs, birds, and other pets.
 
 All these animals share certain characteristics. They have names, they may have ages, and they can perform common actions such as sleeping. Creating a separate class with all these members for every animal would lead to unnecessary duplication.
 
 Instead, we can define a common class containing the shared members and let the other classes build upon it. This is the idea behind **inheritance**.
 
 The class providing the shared members is called the **base class**, while the classes that inherit from it are called **derived classes**.
-
 #### Base and Derived Classes
 Let's return to our pet-store example:
 ```cpp
@@ -620,6 +565,7 @@ Let's return to our pet-store example:
 #include <string>
 using namespace std;
 
+// base class
 class Pet {
 protected:
     string name;
@@ -638,6 +584,7 @@ public:
     }
 };
 
+// derived class
 class Cat : public Pet {
 public:
     Cat(const string& name, int age)
@@ -679,8 +626,6 @@ Notice how their constructors call `Pet(name, age)` in their initialization list
 ### Public, Protected, and Private Inheritance
 We have used `public` inheritance, but C++ also allows `protected` and `private` inheritance.
 
-These three forms determine how the inherited public and protected members are exposed through the derived class.
-
 With **public inheritance**, the base class's public members remain public, and its protected members remain protected. This is the usual choice when a derived class represents a specialized form of the base class. For example, a `Dog` is a kind of `Pet`.
 
 With **protected inheritance**, the base class's public and protected members become protected in the derived class. They can be accessed within the derived class and its descendants, but they are not publicly accessible through an ordinary object of that class.
@@ -711,8 +656,6 @@ public:
     }
 };
 ```
-The distinction between public, protected, and private access becomes particularly important as inheritance hierarchies grow. We should choose the access level according to what the class needs to expose, not simply according to what makes the code compile.
-
 ### Constructor and Destructor Order in Inheritance
 Inheritance also affects the order in which objects are constructed and destroyed.
 
@@ -760,7 +703,6 @@ Derived constructor
 Derived destructor
 Base destructor
 ```
-As you can see, the base constructor runs first because the derived object contains a base-class portion that must be initialized before the derived-class constructor body executes. When the object is destroyed, the order is reversed: the derived destructor runs first, followed by the base destructor.
 ### Polymorphism and Virtual Functions
 Our `Cat` and `Dog` classes both have a `talk()` function, but they produce different sounds. We might want to write a function that accepts any pet and asks it to make a sound without knowing whether the actual object is a cat or a dog.
 
@@ -821,18 +763,9 @@ int main() {
     return 0;
 }
 ```
-Although `p1` and `p2` are pointers to `Pet`, they point to different derived objects. Because `talk()` is virtual, the program calls the appropriate derived implementation.
+Although `p1` and `p2` are pointers to `Pet`, they point to different derived objects. Because `talk()` is virtual, the program calls the appropriate derived implementation. This behavior is known as **dynamic dispatch**
 
-The output is:
-```
-Mimi says meow!
-Jack says woof!
-```
-This behavior is known as **dynamic dispatch**: the program determines which overridden virtual function to execute according to the actual object's type at runtime.
-
-The keyword `virtual` tells C++ that a function can be **overridden in a derived class and that the appropriate implementation should be selected at runtime**, based on the actual type of the object
-
-Without `virtual`, calling `talk()` through a `Pet*` would select the base-class version instead. The derived functions would not participate in virtual dispatch.
+The keyword `virtual` tells C++ that a function can be **overridden in a derived class and that the appropriate implementation should be selected at runtime**, based on the actual type of the object. Without `virtual`, calling `talk()` through a `Pet*` would select the base-class version instead.
 #### The `override` and `final` Specifiers
 You may have noticed that we wrote `override` after the `talk()` functions in the derived classes. These specifiers help us control how virtual functions behave in an inheritance hierarchy.
 
@@ -851,8 +784,6 @@ public:
     }
 };
 ```
-Here, `Cat::talk()` overrides the base-class function, but marking it `final` prevents any class derived from `Cat` from overriding it again.
-
 We can also use `final` on a class itself to prevent further inheritance:
 ```cpp
 class SpecialPet final : public Pet {
@@ -875,15 +806,11 @@ To handle this correctly, we declare the base-class destructor as `virtual`:
 ```cpp
 virtual ~Pet() = default;
 ```
-Now, when we delete the object through a `Pet*`, C++ calls the derived-class destructor first, followed by the base-class destructor. This ensures that both classes have the opportunity to clean up their resources properly.
-
-For this reason, a base class intended for polymorphic use should generally have a public virtual destructor. However, if deleting objects through base-class pointers is deliberately forbidden, a protected non-virtual destructor can be appropriate instead.
+Now, when we delete the object through a `Pet*`, C++ calls the derived-class destructor first, followed by the base-class destructor. 
 #### Overloading and Overriding
 We have encountered two related concepts that are important in C++, but they serve different purposes: **function overloading** and **function overriding**.
 
 **Function overloading** means defining multiple functions with the same name but different parameter lists. The compiler determines which function to call based on the arguments provided.
-
-Our earlier `Distance` example illustrates this:
 ```cpp
 #include <cmath>
 using namespace std;
@@ -903,19 +830,11 @@ public:
 ```
 We can create `Distance d1(5.0)`, `Distance d2(3.0, 4.0)`, or `Distance d3(3.0, 4.0, 6.0)`. The compiler selects the appropriate constructor according to the number and types of the arguments.
 
-This is called **constructor overloading**. Although it allows the same class to be initialized in different ways, it is not runtime polymorphism.
-
 **Function overriding**, on the other hand, occurs when a derived class provides its own implementation of an inherited virtual function. The overriding function must have a compatible signature, and the `override` specifier can be used to let the compiler verify that the function actually overrides a base-class function.
-
-When the function is called through a suitable base-class pointer or reference, C++ uses virtual dispatch to select the appropriate implementation according to the actual object's type.
-
-The key difference is that **overloading allows the same function name to handle different parameter lists, while overriding allows a derived class to specialize inherited behavior**. Overload resolution is performed at compile time, whereas virtual dispatch determines which overridden implementation to execute at runtime.
 ### Abstract Classes and Interfaces
 In the previous example, our `Pet` class provided a default implementation of `talk()`. But sometimes a base class should define a required behavior without specifying how that behavior must be implemented.
 
-For example, a generic `Shape` class could require every derived shape to calculate its area, while leaving the actual calculation to classes such as `Circle` and `Rectangle`.
-
-C++ allows us to express this using **pure virtual functions**.
+For example, a generic `Shape` class could require every derived shape to calculate its area, while leaving the actual calculation to classes such as `Circle` and `Rectangle`. C++ allows us to express this using **pure virtual functions**.
 
 A pure virtual function is declared by placing `= 0` at the end of its declaration. A class containing at least one pure virtual function is an abstract class, and we cannot create objects of that class directly.
 ```cpp
@@ -969,14 +888,11 @@ int main() {
 ```
 The `Shape` class establishes a common interface: every concrete shape must provide an `area()` implementation before it can be instantiated.
 
-We can store pointers to different shapes in the same array and call `area()` through each pointer. Virtual dispatch then selects the appropriate implementation. This is useful when we want to write code that depends on a common capability rather than on a particular class.
-
 An abstract class can contain ordinary data members, constructors, implemented member functions, and pure virtual functions. It does not have to consist entirely of abstract operations.
 #### Interface
 In C++, an **interface** is commonly represented by an abstract class whose main purpose is to specify operations that derived classes must provide. C++ does not have a separate `interface` keyword like some other languages, so we typically use a class containing pure virtual functions and a virtual destructor.
 
 The distinction is conceptual: an abstract class can provide shared state and implementation, while an interface-style class focuses primarily on defining a contract.
-
 ### Copy Semantics: 
 Until now, our objects have contained relatively simple data, such as numbers and strings. When we copy an object of this kind, the compiler-generated copy operations are usually sufficient.
 
@@ -1103,8 +1019,6 @@ int main() {
 Now, `n1` and `n2` own separate allocations containing the same value. Destroying one object does not invalidate the other.
 
 However, this implementation is still incomplete. We have defined a destructor and a copy constructor, but we have not defined how assignment should work. The compiler-generated copy assignment operator would still copy the pointer itself.
-
-This leads us to two important guidelines.
 #### The Rule of Three
 The **Rule of Three** states that if a class needs to define any one of the following because it manages a resource, it will often need to define all three:
 - Destructor.
@@ -1123,11 +1037,6 @@ Number& operator=(const Number& other) {
     return *this;
 }
 ```
-This implementation is suitable for our particular class because every valid object already owns an allocated integer. We copy the integer's value into the existing allocation rather than replacing the pointer.
-
-The expression `this != &other` checks that we are not assigning an object to itself. The return type `Number&` allows assignments to be chained.
-
-For classes managing more complicated resources, assignment may need additional logic to provide strong exception safety or to handle allocation failures correctly.
 ### The Rule of Five
 Modern C++ also introduces move semantics, which allow resources to be transferred instead of copied unnecessarily.
 
@@ -1211,13 +1120,13 @@ int main() {
 ```
 The move constructor transfers the pointer from `n1` to `n3`, then sets `n1.value` to `nullptr`. The moved-from object remains valid and can safely be destroyed.
 
-`std::move` does not transfer resources by itself. Instead, it converts an expression into an rvalue, allowing the appropriate move operation to be selected. An **rvalue** is typically a temporary value, such as `10` or `x + 5`, that can be used to initialize an object or transfer resources rather than copy them.
-
+`std::move` does not transfer resources by itself. Instead, it converts an expression into an rvalue, allowing the appropriate move operation to be selected. 
+#### Rule of Zero
 There is also an important modern C++ guideline: **the Rule of Zero**. If we design a class using resource-managing types such as `std::string`, `std::vector`, and smart pointers, we can often avoid writing custom copy and move operations entirely.
 
 For example, a class containing a `std::vector<int>` can generally rely on the vector's own copy, move, and destruction behavior. This is usually safer than manually managing a raw pointer.
 ### Multiple Inheritance
-So far, every derived class has inherited from a single base class. C++ also allows a class to inherit from multiple base classes, a feature known as **multiple inheritance**.
+C++ also allows a class to inherit from multiple base classes, a feature known as **multiple inheritance**.
 
 This is useful when a class needs to combine distinct capabilities. For example, a robot might need navigation and communication capabilities. Instead of defining both behaviors directly inside `Robot`, we can implement them in separate classes and let `Robot` inherit from both.
 ```cpp
@@ -1256,9 +1165,7 @@ int main() {
     return 0;
 }
 ```
-The declaration `class Robot : public Navigator, public Communicator` tells the compiler that `Robot` inherits from both `Navigator` and `Communicator`. As a result, it can use their public functions without redefining them. The `operate()` function simply combines both capabilities into a single operation.
-
-Multiple inheritance is useful when a class genuinely needs to combine behaviors from different base classes. However, it can introduce ambiguity when those classes provide members with the same name.
+The declaration `class Robot : public Navigator, public Communicator` tells the compiler that `Robot` inherits from both `Navigator` and `Communicator`. As a result, it can use their public functions without redefining them. 
 #### Ambiguity in Multiple Inheritance
 Consider two classes that both define a function called `display()`:
 ```cpp
@@ -1298,11 +1205,6 @@ The problem occurs when we call `obj.display()`. Since `C` inherits from both `A
 We can resolve this ambiguity using the **scope-resolution operator (`::`)** to specify the class whose function we want to execute. In the example, `obj.A::display()` calls the function inherited from `A`, while `obj.B::display()` calls the function inherited from `B`.
 
 Alternatively, we can define our own `display()` function inside `C` to establish a specific behavior for the derived class.
-
-This example illustrates one of the challenges of multiple inheritance: combining classes is straightforward when their interfaces are distinct, but overlapping member names can require explicit decisions.
-
-A more subtle problem arises when the inheritance hierarchy contains a diamond.
-
 #### The Diamond Problem
 Imagine that we have a base class called `Person`. Two classes, `Student` and `Employee`, inherit from `Person`. We then create a class called `TeachingAssistant` that inherits from both `Student` and `Employee`.
 
@@ -1351,9 +1253,6 @@ The problem is that `TeachingAssistant` inherits from `Person` along two differe
 With ordinary inheritance, these paths create **two separate `Person` subobjects** inside `TeachingAssistant`. Each subobject has its own `id` member, so the compiler cannot determine which one we mean when we write `ta.id`.
 
 We can access either member explicitly using `ta.Student::id` or `ta.Employee::id`, but this does not eliminate the duplication. In our example, a teaching assistant represents one person, so having two separate `Person` subobjects is probably not what we want.
-
-C++ provides a solution called **virtual inheritance**, which allows the inheritance paths to share a single base-class subobject.
-
 #### Virtual Inheritance
 To solve the diamond problem, we modify the declarations of `Student` and `Employee`:
 ```cpp
@@ -1382,10 +1281,6 @@ int main() {
     return 0;
 }
 ```
-The output is:
-```
-100
-```
 Notice the addition of `virtual` in the inheritance declarations:
 ```cpp
 class Student : virtual public Person {
@@ -1396,11 +1291,7 @@ class Employee : virtual public Person {
 ```
 This tells C++ that `Person` is a **virtual base class**. When a `TeachingAssistant` object is created, both inheritance paths share the same `Person` subobject instead of creating two separate copies.
 
-As a result, `TeachingAssistant` contains a single `Person` subobject, and accessing `ta.id` is no longer ambiguous.
-
 It is important to understand that virtual inheritance solves the problem of duplicated base-class subobjects, but it does not resolve every ambiguity in multiple inheritance. If two base classes independently define a function with the same name, we may still need to qualify the function or provide an explicit implementation in the derived class.
-
-There is also an important detail concerning constructors: **the most-derived class is responsible for initializing virtual base classes**. For example, if `Person` had a constructor requiring arguments, `TeachingAssistant` would be responsible for initializing that virtual base when constructing a complete `TeachingAssistant` object.
 #### When Should We Use Multiple Inheritance?
 Multiple inheritance is useful when a class genuinely combines distinct interfaces or capabilities. It can be especially effective when inheriting from small abstract interface classes that define separate responsibilities.
 
@@ -1438,8 +1329,7 @@ Here, `Math` groups the constant `PI` and the function `circleArea()`. We access
 This becomes particularly useful in larger programs where several classes and libraries might otherwise introduce conflicting names.
 
 Although we have used `using namespace std;` throughout these introductory examples to keep them short, it is generally better to avoid placing that directive in header files. Using qualified names such as `std::cout` and `std::string` helps prevent naming conflicts in larger projects.
-
-## Tasks :
+## Tasks
 ### Task 1 :
 Create a class for a bank management system. The class should represent a bank account and include the basic methods and attributes.
 - **Attributes:**
@@ -1528,41 +1418,28 @@ Create a student management system that stores student information, calculates a
     - Use `std::vector` to manage the collection of students.
     - Ensure that copying a student produces an independent copy of its grades.
 
-### Task 5:
-Design a simplified robot control system that combines multiple capabilities, supports different robot types, and manages resources safely.
-- **Classes:**
-    - `Robot`: An abstract base class representing a generic robot.
-    - `Navigator`: Provides navigation capabilities.
-    - `Communicator`: Provides communication capabilities.
-    - `MobileRobot`: Inherits from `Robot`, `Navigator`, and `Communicator`.
-    - `Sensor`: Represents a sensor connected to a robot.
-    - `RobotManager`: Manages multiple robots.
-- **Attributes:**
-    - `Robot`: Robot ID, name, and operating status.
-    - `Navigator`: Current position and movement speed.
-    - `Communicator`: Connection status.
-    - `Sensor`: Sensor type and dynamically managed measurement data.
-    - `RobotManager`: A collection of robots.
-- **Methods:**
-    - **Constructors and Destructors:** Initialize objects and release resources when necessary.
-    - **Move:** Change the robot's position.
-    - **Communicate:** Send a message or report the connection status.
-    - **Read Sensor:** Retrieve sensor measurements.
-    - **Operate:** Define the behavior of each robot through polymorphism.
-    - **Display Status:** Display the robot's current state.
-    - **Compare Robots:** Compare robots using their IDs.
-    - **Manage Robots:** Add, remove, and operate multiple robots through a common interface.
-- **Requirements:**
-    - Define `Robot` as an abstract class with at least one pure virtual function.
-    - Use `override` to implement the required behavior in `MobileRobot`.
-    - Use a virtual destructor in `Robot`.
-    - Use multiple inheritance to combine navigation and communication capabilities.
-    - Demonstrate multiple-inheritance ambiguity and resolve it using the scope-resolution operator or an explicit implementation in the derived class.
-    - Create a diamond-shaped inheritance hierarchy involving a common `Device` base class, and use virtual inheritance to ensure that the final derived object contains only one `Device` subobject.
-    - Implement a `Sensor` class that dynamically manages measurement data.
-    - Implement the copy constructor, copy assignment operator, move constructor, and move assignment operator for `Sensor`.
-    - Ensure that copying a sensor creates independent measurement storage, while moving transfers ownership of the resource.
-    - Use `std::move` to demonstrate move semantics.
+### Task 5: Robot Control System
+
+Design a small robot-control system that demonstrates abstract classes, multiple inheritance, polymorphism, and safe resource ownership.
+
+- `Robot` is an abstract base class containing an ID and a name. It declares a pure virtual `operate()` function and has a virtual destructor.
+- `Navigator` provides a method for changing and displaying a robot's position.
+- `Communicator` provides methods for connecting and disconnecting communication.
+- `MobileRobot` inherits from `Robot`, `Navigator`, and `Communicator`.
+- `ArmRobot` is a second concrete robot type so that the manager can demonstrate polymorphism.
+- `Sensor` stores a sensor type and a collection of integer measurements.
+- `RobotManager` stores and manages robots through `std::unique_ptr<Robot>`.
+
+**Requirements:**
+1. Use constructor initialization lists and validate IDs and required text values.
+2. Override `operate()` in both concrete robot classes.
+3. Store robots in `std::vector<std::unique_ptr<Robot>>` and add them with `std::make_unique`.
+4. Demonstrate navigation and communication with a `MobileRobot`.
+5. Use `std::vector<int>` in `Sensor` so copying a sensor creates independent measurement data without writing manual memory-management functions.
+6. Display each robot through the common `Robot` interface.
+
+**Additional challenge:** Add a virtual `display()` function to `Robot` and override it in the derived classes. Compare two robots by their IDs without transferring ownership.
+
     - Apply the Rule of Five where manual resource management requires it, and explain how the Rule of Zero could simplify the implementation using standard-library containers or smart pointers.
     - Use `final` to prevent further inheritance from one selected class or prevent overriding of one selected virtual function.
     - Organize the system inside a namespace named `Robotics`.

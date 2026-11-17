@@ -1,19 +1,25 @@
 #include <iostream>
+#include <vector>
 #include "array_funcs.h"
-using namespace std;
 
-int main(){
-    int size;
-    cout << "Enter Number of Element : ";
-    cin >> size;
-    int* arr = new int[size];
-    for (int i = 0; i < size; i++){
-        cout << "Enter the " << i + 1 << "  Element : ";
-        cin >> *(arr + i);
+int main() {
+    int count{};
+    std::cout << "Enter the number of elements: ";
+    if (!(std::cin >> count) || count <= 0) {
+        std::cerr << "The number of elements must be positive.\n";
+        return 1;
     }
-    cout << "The Biggest Element is " << largest(size, arr) << endl;
-    cout << "The Smallest Element is " << smallest(size, arr) << endl;
-    cout << "The Average of The Element is " << avg(size, arr) << endl;
-    delete[] arr;
-    return 0;
+
+    std::vector<int> values(static_cast<std::size_t>(count));
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        std::cout << "Enter element " << i + 1 << ": ";
+        if (!(std::cin >> values[i])) {
+            std::cerr << "Invalid input.\n";
+            return 1;
+        }
+    }
+
+    std::cout << "Largest: " << largest(values) << '\n'
+              << "Smallest: " << smallest(values) << '\n'
+              << "Average: " << average(values) << '\n';
 }

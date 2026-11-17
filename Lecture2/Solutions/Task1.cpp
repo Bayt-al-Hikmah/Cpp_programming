@@ -1,41 +1,37 @@
-#include <iostream>
 #include <cmath>
-using namespace std;
+#include <iostream>
 
-int main(){
-    float a, b, c, x, x1, x2, delta;
-    cout << "Enter the value of a : ";
-    cin >> a;
-    cout << "Enter the value of b : ";
-    cin >> b;
-    cout << "Enter the value of c : ";
-    cin >> c;
-    if (a == 0 && b == 0){
-        cout << "There is no equation" << endl;
-    }else if(a == 0 && b != 0){
-        x = -c / b;
-        cout << "Solution is :\n";
-        cout << "x = ";
-        cout << x << endl;
-    }else{
-        delta = b * b - 4 * a * c;
-        if(delta < 0){
-            cout << "No solution " << endl;
-
-        }else if(delta == 0){
-            x = -b / (2 * a);
-            cout << "Solution is :\n";
-            cout << "x = " ;
-            cout<< x << endl;
-        }else{
-            x1 = (-b + sqrt(delta)) / (2 * a);
-            x2 = (-b - sqrt(delta)) / (2 * a);
-            cout << "Solutions are :\n";
-            cout << "x1 = " ;
-            cout<< x1 << endl;
-            cout << "x2 = " ;
-            cout << x2 << endl;
-        }
+int main() {
+    double a{}, b{}, c{};
+    std::cout << "Solve ax^2 + bx + c = 0\n";
+    std::cout << "Enter a, b, and c: ";
+    if (!(std::cin >> a >> b >> c)) {
+        std::cerr << "Invalid input.\n";
+        return 1;
     }
-    return 0;
+
+    if (a == 0.0) {
+        if (b == 0.0) {
+            std::cout << (c == 0.0
+                ? "Every real number is a solution.\n"
+                : "There is no solution.\n");
+        } else {
+            std::cout << "Linear solution: x = " << -c / b << '\n';
+        }
+        return 0;
+    }
+
+    const double discriminant = b * b - 4.0 * a * c;
+    const double tolerance = 1e-12 * (b * b + std::abs(4.0 * a * c) + 1.0);
+
+    if (discriminant > tolerance) {
+        const double root = std::sqrt(discriminant);
+        const double x1 = (-b + root) / (2.0 * a);
+        const double x2 = (-b - root) / (2.0 * a);
+        std::cout << "Two real roots: " << x1 << " and " << x2 << '\n';
+    } else if (discriminant >= -tolerance) {
+        std::cout << "One real root: " << -b / (2.0 * a) << '\n';
+    } else {
+        std::cout << "There are no real roots.\n";
+    }
 }

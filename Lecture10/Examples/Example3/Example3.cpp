@@ -31,7 +31,7 @@ int main() {
 
     cout << "\n=== Transfer Ownership ===\n";
 
-    takeOwnership(move(source));
+    takeOwnership(std::move(source));
 
     // The original pointer is now empty
     if (!source) {
@@ -46,7 +46,7 @@ int main() {
     // auto second = first;
 
     // Correct: transfer ownership
-    auto second = move(first);
+    auto second = std::move(first);
 
     cout << "Second owns: " << *second << '\n';
 

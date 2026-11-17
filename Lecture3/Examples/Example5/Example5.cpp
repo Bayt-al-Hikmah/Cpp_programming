@@ -1,6 +1,7 @@
 // Working with Vectors
 
 #include <iostream>
+#include <cstddef>
 #include <vector>
 #include <string>
 using namespace std;
@@ -98,7 +99,7 @@ int main() {
 
     // Index-Based Loop
     vector<int> scores = {15, 18, 12, 16, 14};
-    for (int i = 0; i < scores.size(); i++) {
+    for (std::size_t i = 0; i < scores.size(); ++i) {
         cout << "Score " << i << ": " << scores[i] << endl;
     }
 
@@ -129,7 +130,7 @@ int main() {
 
     // Iterating Through a Vector Using a Pointer
     cout << "Vector elements through pointer:" << endl;
-    for (int i = 0; i < data.size(); i++) {
+    for (std::size_t i = 0; i < data.size(); ++i) {
         cout << *(ptr + i) << endl;
     }
 

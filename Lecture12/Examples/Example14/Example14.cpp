@@ -16,7 +16,7 @@ int main() {
 
     // Create a worker thread
     thread worker(
-        [p = move(promiseObject)]() mutable {
+        [p = std::move(promiseObject)]() mutable {
 
             cout << "Worker is calculating...\n";
 

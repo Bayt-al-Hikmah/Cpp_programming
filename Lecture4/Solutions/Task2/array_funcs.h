@@ -1,33 +1,36 @@
-#ifndef array_funcs
-#define array_funcs
+#pragma once
 
-int largest(int size, int *arr){
-    int tmp = *arr;
-    for(int i = 0; i < size; i++){
-        if(*(arr + i) > tmp){
-            tmp = *(arr + i);
-        }
-        
+#include <cstddef>
+#include <numeric>
+#include <span>
+#include <stdexcept>
+
+inline int largest(std::span<const int> values) {
+    if (values.empty()) {
+        throw std::invalid_argument("The array must contain at least one value.");
     }
-    return tmp;
+    int result = values.front();
+    for (int value : values) {
+        if (value > result) result = value;
+    }
+    return result;
 }
 
-int smallest(int size, int *arr){
-    int tmp = *arr;
-    for(int i = 0; i < size; i++){
-        if(*(arr + i) < tmp){
-            tmp = *(arr + i);
-        }
-        
+inline int smallest(std::span<const int> values) {
+    if (values.empty()) {
+        throw std::invalid_argument("The array must contain at least one value.");
     }
-    return tmp;
+    int result = values.front();
+    for (int value : values) {
+        if (value < result) result = value;
+    }
+    return result;
 }
 
-float avg(int size, int *arr){
-    float tmp = 0;
-    for(int i = 0; i < size; i++){
-        tmp += (float) *(arr + i) / (float) size;
+inline double average(std::span<const int> values) {
+    if (values.empty()) {
+        throw std::invalid_argument("The array must contain at least one value.");
     }
-    return tmp;
+    const long long total = std::accumulate(values.begin(), values.end(), 0LL);
+    return static_cast<double>(total) / static_cast<double>(values.size());
 }
-#endif

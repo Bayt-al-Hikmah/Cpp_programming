@@ -1,4 +1,4 @@
-// Working wiht Variables
+// Working with variables
 
 #include <iostream>
 #include <string> // include so we use string
@@ -7,7 +7,7 @@ using namespace std;
 int main() {
     // Create variable
 
-    // Numeric varibales
+    // Numeric variables
     // int
     int a = 4;
     // short
@@ -30,9 +30,13 @@ int main() {
     // String
     string name = "Alice";
 
-    // Constant
-    constexpr double PI = 3.141592653589793; // compile time constant
-    const double ratio = 4.5949483;          // runtime constant
+    // Constants
+    constexpr double pi = 3.141592653589793; // compile-time constant
+    const double ratio = 4.5949483;          // read-only after initialization
+
+    std::cout << a << ' ' << b << ' ' << count << ' ' << temperature << ' '
+              << price << ' ' << value << ' ' << grade << ' ' << isLoggedIn
+              << ' ' << name << ' ' << pi << ' ' << ratio << '\n';
 
     return 0;
 }

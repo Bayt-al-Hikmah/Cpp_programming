@@ -32,20 +32,20 @@ int main() {
     cout << "\n=== Xvalue ===\n";
 
     // std::move(sensor) produces an xvalue
-    describe(move(sensor));
+    describe(std::move(sensor));
 
     cout << "\n=== Named Rvalue Reference ===\n";
 
     string original = "Humidity";
 
     // Bind an rvalue reference
-    string&& reference = move(original);
+    string&& reference = std::move(original);
 
     // The name 'reference' is an lvalue expression
     describe(reference);
 
     // Explicitly produce an xvalue
-    describe(move(reference));
+    describe(std::move(reference));
 
     cout << "\n=== Integer Expressions ===\n";
 

@@ -1,11 +1,11 @@
-## Objectives :
-- Learning function declarations, definitions, parameters, arguments, and return values.
-- Understanding pass-by-value, pass-by-reference, and `const` references.
-- Understanding scope, name lookup, storage duration, and object lifetime.
-- Working with function overloading, default arguments, and inline functions.
-- Organizing a C++ program using header files and multiple `.cpp` files.
-- Using include guards and `#pragma once`.
+# Functions and Program Organization
 
+## Learning Objectives
+- Declare, define, call, and return values from functions.
+- Choose between pass-by-value, pass-by-reference, and pass-by-const-reference.
+- Understand scope, lifetime, overloads, default arguments, and recursion.
+- Use lambdas and function objects for simple callback-style operations.
+- Organize programs into headers and multiple source files.
 ## Functions:
 ### Introduction:
 Till now, we have written programs by placing instructions inside `main()` or inside other blocks of code. However, as our programs become larger, we often need to perform the same operation in several places. Copying and pasting the same instructions repeatedly makes a program longer, harder to read, and more difficult to maintain.
@@ -13,10 +13,8 @@ Till now, we have written programs by placing instructions inside `main()` or in
 To address this issue, C++ provides **functions**. A function groups instructions under a name so that we can call those instructions whenever we need them. Instead of repeating the implementation, we write it once and reuse it.
 
 For example, if our program needs to calculate the cube of several numbers, we can create a `cube()` function and call it for each number.
-
-### Creating Functions :
+### Creating Functions
 To create a function, we need to follow these steps:
-
 - Identify the block of code that we want to turn into reusable code.
 - Choose a function name.
 - Identify the information the function needs. These inputs are called **parameters**.
@@ -39,8 +37,7 @@ float cube(float n) {
 }
 ```
 Here, `float` is the return type, `cube` is the function name, and `float n` declares a parameter named `n`. The statement `return n * n * n;` calculates the cube and sends the result back to the code that called the function.
-
-#### Calling a Function :
+#### Calling a Function
 Defining a function does not execute it. To execute its body, we must **call** it by writing its name followed by parentheses containing the arguments.
 ```cpp
 float result = cube(3.0f);
@@ -67,11 +64,12 @@ int main(){
 }
 ```
 When `cube(n)` is called, execution enters the `cube` function. After the `return` statement is executed, the result is given back to `main()`, and execution continues from the statement after the call.
-
 ### Function Declaration and Function Definition:
-So far, we have written the complete function before `main()`. This works because the compiler has already seen the function definition when it reaches the call. However, in larger programs, we may want to place `main()` first and put the implementations later.
+We wrote the complete function before `main()`. This works because the compiler has already seen the function definition when it reaches the function call.
 
-For this, C++ lets us **declare** a function before defining it.
+However, in larger programs, we may have multiple functions, each containing its own implementation. Writing all these functions before `main()` would make the code harder to navigate, as we would have to scroll through their implementations to find the main application logic.
+
+To solve this problem, C++ allows us to **declare** a function before defining it.
 
 A **function declaration**, commonly called a **function prototype**, tells the compiler the function's name, return type, and parameter types. It ends with a semicolon and does not contain the function body.
 ```cpp
@@ -90,7 +88,9 @@ The declaration lets the compiler check the call `cube(3.0f)` even though the fu
 
 A **function definition** provides the actual implementation: the instructions that execute when the function is called.
 #### Parameters and Arguments :
-A **parameter** is a variable declared in a function's parameter list. An **argument** is the value or expression supplied when the function is called.
+A **parameter** is a variable declared in a function's parameter list. It acts as a placeholder that allows the function to receive and work with input values.
+
+An **argument** is the actual value or expression supplied to a function when it is called.
 ```cpp
 float sum(float a, float b); // a and b are parameters
 
@@ -112,13 +112,12 @@ int result = sum(4, 6);
 std::cout << sum(10, 20);
 int larger_sum = sum(sum(1, 2), sum(3, 4));
 ```
-A function can also perform an action without returning a result:
+A function can also perform an action without returning a result, those type of functions have return type as `void`:
 ```cpp
 void print_message() { // we use void when there is no return value 
     std::cout << "Hello!\n";
 }
 ```
-Calling `print_message()` executes the output operation, but there is no result to assign to a variable.
 ### Passing Arguments to Functions :
 When we pass an argument to a function, the way its parameter is declared determines whether the function receives a separate value or can access the original object.
 
@@ -198,8 +197,6 @@ int main() {
 }
 ```
 The parameter `const std::string& name` refers to the original string, but the function cannot modify that string through `name`.
-
-This is especially useful for large objects, such as strings and vectors, because it avoids making a copy while preserving read-only access.
 ### Scope of Variables :
 Let's suppose we create a function that calculates the sum of two numbers and stores the result in a variable named `result`.
 ```cpp
@@ -234,8 +231,6 @@ void example() {
 }
 ```
 The variable `x` belongs to the outer block, so it is accessible in the nested block. The variable `y` belongs to the nested block, so it cannot be used after that block ends.
-
-A variable declared in a function is often called a **local variable**. More precisely, local variables are commonly block-scoped names whose objects have automatic storage duration unless another storage-duration rule applies.
 #### Global Scope :
 A variable declared outside every function and class, at namespace scope, can be visible to functions that appear after its declaration, subject to name lookup and linkage rules.
 ```cpp
@@ -257,7 +252,7 @@ int main() {
 ```
 Here, `global_count` is declared outside the functions, so `increment()` and `main()` can use it.
 
-Global variables can be useful when a value genuinely belongs to the program as a whole. However, using them everywhere makes it harder to understand which function changes a value. Prefer parameters and return values when they make the relationship between functions clearer.
+Global variables can be useful when a value genuinely belongs to the program as a whole. However, using them everywhere makes it harder to understand which function changes a value.
 #### Name Lookup and Shadowing :
 When the compiler encounters a name, it must determine which declaration the name refers to. This process is called name lookup.
 
@@ -277,11 +272,8 @@ int main() {
 }
 ```
 The name `value` refers to the local variable inside `main()`. The scope-resolution operator `::` allows us to refer to the global variable in this example.
-
-Choosing clear names and avoiding unnecessary shadowing helps make code easier to read.
-
 ### Function Overloading :
-So far, we have used different function names to perform different operations. However, sometimes we want to perform the same conceptual operation with different types of data or different numbers of parameters.
+Sometimes we want to perform the same conceptual operation with different types of data or different numbers of parameters.
 
 For example, imagine we want to create a function that adds two numbers. We might want to add two integers, two decimal numbers, or even three integers. We could create a different function for each case, but this would require us to use different names for operations that are essentially the same, C++ help us to achieve this using **function overloading**.
 
@@ -289,7 +281,6 @@ Function overloading allows us to define multiple functions with the **same name
 
 When we call the function, the compiler looks at the arguments we pass and selects the appropriate version.
 
-In other words, we use the same function name for the same kind of operation, and let the compiler choose which version to execute based on the arguments we provide.
 For example, let's create a `sum()` function for integers and another for floating-point numbers:
 ```cpp
 #include <iostream>
@@ -311,11 +302,9 @@ int main() {
 ```
 When the compiler sees `sum(3, 4)`, it selects the overload that accepts two `int` parameters. When it sees `sum(2.5, 4.2)`, it selects the overload that accepts two `double` parameters.
 
-The compiler chooses an overload by examining the function name, the number of arguments, and the types of the arguments. If it cannot find a best match, the call is ambiguous and compilation fails.
-
 Functions cannot be overloaded using only different return types. For example, `int calculate(int)` and `double calculate(int)` cannot coexist as overloads.
 ### Default Arguments :
-Sometimes, a function has a parameter that usually receives the same value. Instead of passing that value every time, we can provide a **default argument**.
+A function can have a parameter that usually receives the same value. Instead of passing that value every time, we can provide a **default argument**.
 ```cpp
 #include <iostream>
 
@@ -348,9 +337,8 @@ This is not valid:
 ```cpp
 // void display(int value = 0, int width);
 ```
-Default arguments can make an interface convenient, but too many defaults may make calls difficult to understand. Use them when the default behavior is sensible and predictable.
 ### Inline Functions
-So far, we have seen how functions allow us to organize our code into smaller, reusable pieces. However, calling a function involves transferring control to that function and returning to the original code once the function finishes.
+Calling a function involves transferring control to that function and returning to the original code once the function finishes.
 
 For very small functions that are called frequently, C++ provides the `inline` keyword, which allows the compiler to consider replacing a function call with the actual body of the function.
 ```cpp
@@ -361,100 +349,22 @@ inline int square(int value) {
 Here, we have defined a function called `square` that takes an integer and returns its square.
 
 When we call the function:
-```
+```cpp
 int result = square(5);
 ```
 The function returns `25`.
 
 The `inline` keyword tells the compiler that this function is declared inline. The compiler may choose to replace the function call with its body, effectively performing the following operation:
-```
+```cpp
 int result = 5 * 5;
 ```
 This can eliminate the overhead of a function call in some situations.
 
-However, **the `inline` keyword does not guarantee that the compiler will replace the function call with its body.** The compiler decides whether this optimization is beneficial. Modern compilers can inline functions without the keyword, and they can also keep a normal function call even when `inline` is specified.
+However, **the `inline` keyword does not guarantee that the compiler will replace the function call with its body.** 
+### Functions with a Variable Number of Arguments
+Imagine we want to create a `sum()` function that can calculate the sum of two numbers, three numbers, five numbers, or even more, without defining a separate function for each case.
 
-### Functions with a Variable Number of Parameters
-Most functions we have seen accept a fixed number of parameters. For example, a function that adds two numbers expects two arguments, while a function that calculates the average of three numbers expects three.
-
-However, sometimes we want a function to handle a variable number of arguments. Imagine we want to create a `sum()` function that can calculate the sum of two numbers, three numbers, five numbers, or even more, without defining a separate function for each case.
-
-C++ provides several ways to achieve this. One traditional approach is to use **variadic functions**, which allow a function to accept a fixed number of parameters followed by a variable number of additional arguments.
-### Working with Variable Arguments
-To create a variadic function we need to follow this steps:
-- **Include the `<cstdarg>` header:** This header provides the tools needed to access arguments passed through a variable-length argument list.
-- **Define the function parameters:** We specify at least one named parameter, followed by three dots (`...`). The dots indicate that the function can receive additional arguments beyond its named parameters.
-- **Use `va_list`:** This type allows us to access the additional arguments passed to the function.
-- **Initialize the argument list with `va_start()`:** This macro prepares the argument list for reading. It takes the `va_list` variable and the last named parameter before the ellipsis.
-- **Retrieve arguments using `va_arg()`:** This macro retrieves the next argument and advances the argument list. We must specify the expected type of the argument.
-- **Finish with `va_end()`:** This macro performs the cleanup required for the argument list.
-    
-Let's put these concepts into practice by implementing our `sum()` function.
-```cpp
-#include <iostream>
-#include <cstdarg>
-
-int sum(int count, ...) {
-    va_list ptr;
-    va_start(ptr, count);
-    int s = 0;
-    for (int i = 0; i < count; i++) {
-        s += va_arg(ptr, int);
-    }
-    va_end(ptr);
-    return s;
-}
-
-int main() {
-    int s;
-
-    s = sum(5, 1, 2, 3, 4, 5);
-    std::cout << "The sum is " << s << '\n';
-
-    return 0;
-}
-```
-First, we in the function declaration we had:
-```cpp
-int sum(int count, ...)
-```
-The parameter `count` tells the function how many additional arguments it should process. The three dots (`...`) indicate that the function can receive a variable number of additional arguments.
-
-When we call:
-```
-sum(5, 1, 2, 3, 4, 5);
-```
-The first argument, `5`, is assigned to `count`. The remaining five arguments are the values we want to add.
-
-Inside the function, we declare a variable of type `va_list`, this variable will keep track of our position in the list of additional arguments.
-```cpp
-va_list ptr;
-```
-We then initialize it:
-```cpp
-va_start(ptr, count);
-```
-This prepares `ptr` to access the additional arguments.
-
-Next, used for loop to retrieve each argument:
-```cpp
-for (int i = 0; i < count; i++) {
-    s += va_arg(ptr, int);
-}
-```
-Each call to `va_arg(ptr, int)` retrieves the next argument as an `int`. The retrieved value is added to `s`, and the argument list advances to the next value.
-
-After processing all the arguments, we call:
-```
-va_end(ptr);
-```
-This marks the end of our work with the variable argument list and performs any cleanup required by the implementation. Once we call `va_end()`, we must not use `ptr` to access the arguments again unless we initialize it again with `va_start()` or `va_copy()`.
-#### Important Limitations
-Although variadic functions provide flexibility, they have some important limitations.
-
-First, the compiler does not automatically verify that the number of additional arguments matches `count`. If we provide an incorrect count, the function may attempt to access arguments that were never supplied, resulting in undefined behavior.
-
-Second, the function must know the expected type of each argument. In our example, we use `va_arg(ptr, int)` because we expect every additional argument to be an integer. Retrieving an argument using an incompatible type can also cause undefined behavior.
+C++ provides several ways to achieve this. One of the modern approach is to use **variadic templates**.
 #### Variadic Templates
 C++11 introduced **variadic templates**, which allow functions to accept a variable number of arguments while preserving much stronger type information.
 
@@ -476,8 +386,6 @@ int main() {
 }
 ```
 Here, `typename... Args` declares a template parameter pack, allowing the function to accept a variable number of arguments. The expression `(args + ...)` is a fold expression, which combines the arguments using the addition operator.
-
-Unlike the traditional approach, we do not need to pass an argument count or manually retrieve each argument. The compiler handles the argument pack and checks the operations used with the supplied types.
 
 This implementation requires at least one argument because the `+` fold expression has no initial value.
 ### Recursive Functions
@@ -554,7 +462,7 @@ Without this condition, the function would continue calling itself indefinitely,
 The recursive case defines how the function reduces the problem and calls itself again.
 
 In our example:
-```
+```cpp
 return n * factorial(n - 1);
 ```
 Each call reduces `n` by one, bringing the problem closer to the base case.
@@ -591,8 +499,7 @@ int main() {
     return 0;
 }
 ```
-
-Let's examine the calculate() function:
+Let's examine the `calculate()` function:
 ```cpp
 double calculate(double a, double b, double (*operation)(double, double)) {
     return operation(a, b);
@@ -619,7 +526,7 @@ We pass three arguments: the first number, the second number, and the add functi
 
 Notice that we write add, not `add()`. We are passing the function itself rather than calling it immediately.
 
-Inside calculate(), the following expression executes the function we received:
+Inside `calculate()`, the following expression executes the function we received:
 ```cpp
 return operation(a, b);
 ```
@@ -660,56 +567,8 @@ Instead of defining separate functions for addition and multiplication, we provi
 }
 ```
 This lambda accepts two double values and returns their sum. The empty square brackets `[]` introduce the capture list, the parentheses contain the parameters, and the braces contain the function body.
-
-### Storage Duration and Lifetime:
-Scope and lifetime are related, but they are not the same thing.
-- **Scope** determines where a name can be used in the source code.
-- **Storage duration** describes the minimum period during program execution for which the storage of an object is managed.
-- **Lifetime** is the period during which an object has been constructed and can validly be used as an object of its type.
-#### Automatic Storage Duration:
-Most local variables have automatic storage duration. Their lifetimes generally begin when execution reaches their declarations and end when their enclosing block is exited.
-```cpp
-void example() {
-    int number = 10; // The object is created here
-    std::cout << number << '\n';
-} // number's lifetime ends here
-```
-Each call to `example()` creates a new local `number`. When the call ends, that local object's lifetime ends.
-#### Static Storage Duration:
-Objects with static storage duration exist for the duration of the program. This includes namespace-scope variables and local variables declared with the `static` keyword.
-
-A normal local variable is initialized again each time its declaration is reached in a new function call. A local `static` variable is initialized only once and retains its value between calls.
-```cpp
-#include <iostream>
-
-void count_calls() {
-    int ordinary_count = 0;
-    static int persistent_count = 0;
-
-    ++ordinary_count;
-    ++persistent_count;
-
-    std::cout << "ordinary = " << ordinary_count
-              << ", static = " << persistent_count << '\n';
-}
-
-int main() {
-    count_calls();
-    count_calls();
-    count_calls();
-
-    return 0;
-}
-```
-The output is:
-```text
-ordinary = 1, static = 1
-ordinary = 1, static = 2
-ordinary = 1, static = 3
-```
-The ordinary local variable starts at `0` on each call. The local static variable is initialized once, keeps its value, and continues from the previous call.
 #### Reference Lifetime :
-A reference is an alias for an object; it is not a separate object that owns the referred-to value. A reference must be initialized when it is declared, and it cannot later be reseated to refer to a different object.
+A reference is an alias for an object; it is not a separate object that owns the referred-to value. A reference must be initialized when it is declared, and it cannot be used  to refer to a different object.
 
 The referred-to object must remain alive for every use of the reference. If the object is destroyed while a reference still refers to it, the reference becomes dangling. Using a dangling reference is undefined behavior.
 ```cpp
@@ -738,7 +597,7 @@ int& element_at(int values[], int index) {
 int main() {
     int numbers[] = {10, 20, 30};
 
-    element_at(numbers, 1) = 99;
+    element_at(numbers, 1) = 99; // same as numbers[1] = 99
 
     std::cout << numbers[1] << '\n'; // 99
     return 0;
@@ -768,7 +627,6 @@ The value of `argc` will be `3`, because there are three arguments:
 - `./greeting`
 - `Ali`
 - `Cat`
-
 #### `argv` Argument Values
 The `argv` parameter provides access to the command-line arguments themselves.
 
@@ -837,8 +695,6 @@ int sum(int a, int b);
 ```
 is a **function declaration**, also called a function prototype. It tells the compiler that a function named `sum` exists, accepts two `int` parameters, and returns an `int`.
 
-Notice that we have not written the function's body. We are only declaring the function, not implementing it. The actual implementation will be placed in another file.
-
 You may also have noticed the following line:
 ```
 #pragma once
@@ -885,10 +741,6 @@ int sum(int a, int b) {
 ```
 Unlike the declaration in the header, this definition contains the function's body. It specifies exactly how the function works.
 
-Notice that the function has the same name, parameter types, and return type as the declaration in `math_utils.hpp`.
-
-Including the header in `math_utils.cpp` helps the compiler detect inconsistencies between the declaration and the definition.
-
 At this point, our function is declared in the header and implemented in the source file. However, we still need to use it from another file.
 ### Using the Header from Another Source File
 Now we can use the function in our  `main.cpp`:
@@ -916,19 +768,17 @@ Consequently, the compiler knows that `sum()` accepts two integers and returns a
 ```
 sum(a, b);
 ```
-Notice that `main.cpp` does not need to know how `sum()` is implemented. It only needs to know its interface. This is one of the main advantages of separating declarations from implementations.
-
-Imagine that we later change the implementation of `sum()` while keeping the same function interface. The code in `main.cpp` can continue using the function without needing to know about the internal changes.
+Notice that `main.cpp` does not need to know how `sum()` is implemented. It only needs to know its interface. 
 
 The header tells other files how to use a function, while the source file contains the code that makes the function work.
 ### Compiling Multiple Source Files
 With a compiler such as `g++`, we can compile and link our program using the following command:
 ```shell
-g++ -std=c++17 main.cpp math_utils.cpp -o program
+g++ -std=c++20 main.cpp math_utils.cpp -o program
 ```
 Let's break down this command:
 - `g++` invokes the GNU C++ compiler.
-- `-std=c++17` selects the C++17 language standard.
+- `-std=c++20` selects the C++20 language standard used as the course baseline.
 - `main.cpp math_utils.cpp` specifies the source files to compile.
 - `-o program` specifies the name of the resulting executable.
 
@@ -938,16 +788,16 @@ We can then run the program:
 ```
 ./program
 ```
-## Tasks :
+## Tasks
 ### Task 1:
-Write a recursive function in C++ that takes a decimal number as input and return it as binary number.
+Write a recursive function that converts a non-negative decimal integer to its binary representation and returns the result as a `std::string`. Handle `0` as a special case. Returning a string avoids numeric overflow and preserves leading zeroes when required by a calling program.
 ### Task 2:
 Create a header file that contains the following functions: 
 - **Function** to find the largest element in an array.
 - **Function** to find the smallest element.
 - **Function** to calculate the average of all the elements in the array. 
 
-Then, create a program file that prompts the user to enter the number of elements in the array, dynamically allocates memory for the array, and uses the previously defined functions to find and display the largest element, smallest element, and the average of the array elements.
+Then, create a program file that asks the user for the number of elements, stores the values in a `std::vector<int>`, and calls the functions from the header to display the largest element, smallest element, and average. Reject zero or negative element counts. Use `std::span<const int>` in the helper-function interfaces so they can read a contiguous range without taking ownership of it.
 ## Task 3:
 Create a header file that contains a function to calculate the square of an integer. Then, create a program file that includes the header and uses the function to display the square of a number entered by the user.
 ### Task 4:

@@ -1,9 +1,10 @@
-## Objectives
-- Understand how C++ file streams read data from files and write results to files using `std::ifstream`, `std::ofstream`, and the `<fstream>` header.
-- Use `std::stringstream` to parse and process strings containing structured data.
-- Understand binary file I/O and safely read and write raw binary data.
-- Format output using stream manipulators such as `std::fixed`, `std::setprecision`, `std::setw`, and `std::boolalpha`.
+# File I/O and Stream Formatting
 
+## Learning Objectives
+- Read and write text files with standard file streams.
+- Parse and format text with string streams.
+- Understand the limits and portability risks of raw binary file I/O.
+- Format console and file output with stream manipulators.
 ## Streams & File I/O
 ### Introduction
 So far, most of our C++ programs have received input from the keyboard and displayed results on the screen. This works well when we want to experiment with an algorithm, but practical applications often need to store information after a program finishes or retrieve information that was recorded earlier.
@@ -564,6 +565,8 @@ std::cout << "Price: " << loaded.price << '\n';
 ```
 The important idea is that `write()` and `read()` transfer bytes rather than converting individual values into formatted text.
 ### Reading and Writing Binary Data Safely
+
+> **Portability warning:** Writing a structure with `write(reinterpret_cast<const char*>(&object), sizeof object)` is suitable only for controlled cases where the same program, compiler ABI, and data representation are expected. Padding, endianness, type sizes, and floating-point representation can vary. For long-lived or cross-platform files, serialize each field explicitly in a documented format instead of dumping a structure.
 Writing an object's raw memory representation is useful for understanding binary file I/O, but it comes with important limitations.
 
 **First, an object's memory layout is not necessarily portable.** A compiler may insert padding bytes between structure members to satisfy alignment requirements. Consequently, two systems can use different layouts for the same structure.
@@ -780,7 +783,8 @@ The same integer is displayed differently depending on the selected base.
 Each manipulator changes how subsequent integer values are formatted. The selected base persists on the stream until another base manipulator is applied. For example, after `using std::hex`, we can return to decimal notation with `std::dec`.
 
 By default, hexadecimal output uses lowercase letters. The additional manipulator `std::uppercase` makes hexadecimal letters uppercase, while `std::nouppercase` restores lowercase formatting.
-## Tasks :
+
+## Tasks
 ### Task 1 : 
 Write a program in C++ that manages student grades using file streams.
 

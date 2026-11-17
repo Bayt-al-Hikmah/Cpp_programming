@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <cmath>
 #include <stdexcept>
 
 struct Employee {

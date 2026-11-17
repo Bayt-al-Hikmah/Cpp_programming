@@ -1,18 +1,33 @@
+#include <array>
+#include <iomanip>
 #include <iostream>
-using namespace std;
+#include <string>
 
-int main(){
-    char name[10];
-    float grades[3], avg;
-    cout << "Enter student name : ";
-    cin >> name;
-    printf("Enter first grade : ");
-    cin >> grades[0];
-    printf("Enter second grade : ");
-    cin >> grades[1];
-    cout <<"Enter third grade : ";
-    cin >> grades[2];
-    avg = (grades[0] + grades[1] + grades[2]) / 3.0;
-    cout << name << " have those marks " << grades[0] << ", " << grades[1] << ", " << grades[2] << " \n And this is his average " << avg << endl;
-    return 0;
+int main() {
+    std::string studentName;
+    std::array<double, 3> grades{};
+
+    std::cout << "Enter the student's full name: ";
+    std::getline(std::cin, studentName);
+    if (studentName.empty()) {
+        std::cerr << "The name cannot be empty.\n";
+        return 1;
+    }
+
+    double total = 0.0;
+    for (std::size_t i = 0; i < grades.size(); ++i) {
+        std::cout << "Enter grade " << i + 1 << ": ";
+        if (!(std::cin >> grades[i]) || grades[i] < 0.0 || grades[i] > 20.0) {
+            std::cerr << "Enter a valid grade between 0 and 20.\n";
+            return 1;
+        }
+        total += grades[i];
+    }
+
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "\nStudent: " << studentName << '\n';
+    for (std::size_t i = 0; i < grades.size(); ++i) {
+        std::cout << "Grade " << i + 1 << ": " << grades[i] << '\n';
+    }
+    std::cout << "Average: " << total / grades.size() << '\n';
 }

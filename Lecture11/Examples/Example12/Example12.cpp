@@ -25,8 +25,6 @@ int main() {
         {5, "USB Cable", 20, 4.99, true}
     };
 
-    int count = sizeof(products) / sizeof(products[0]);
-
 
     // Open the invoice file
     ofstream file("invoice.txt");

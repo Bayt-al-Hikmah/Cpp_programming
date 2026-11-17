@@ -1,119 +1,100 @@
-#include <iostream>
 #include <cmath>
-using namespace std;
+#include <iostream>
+#include <memory>
+#include <numbers>
+#include <stdexcept>
+#include <vector>
 
 class Shape {
 public:
     virtual double area() const = 0;
     virtual double perimeter() const = 0;
-    virtual void display() const = 0;
-
-    virtual ~Shape() {
-    }
+    virtual void print(std::ostream& out) const = 0;
+    virtual ~Shape() = default;
 };
 
-class Circle : public Shape {
-private:
-    double radius;
+std::ostream& operator<<(std::ostream& out, const Shape& shape) {
+    shape.print(out);
+    return out;
+}
 
+class Circle final : public Shape {
 public:
-    Circle(double r) {
-        radius = r;
+    explicit Circle(double radius) : radius_(radius) {
+        if (!std::isfinite(radius_) || radius_ <= 0.0) {
+            throw std::invalid_argument("Circle radius must be positive.");
+        }
     }
 
-    double area() const override {
-        return 3.14159 * radius * radius;
+    double area() const override { return std::numbers::pi * radius_ * radius_; }
+    double perimeter() const override { return 2.0 * std::numbers::pi * radius_; }
+    void print(std::ostream& out) const override {
+        out << "Circle(radius=" << radius_ << ", area=" << area()
+            << ", perimeter=" << perimeter() << ')';
     }
 
-    double perimeter() const override {
-        return 2 * 3.14159 * radius;
-    }
-
-    void display() const override {
-        cout << "Circle" << endl;
-        cout << "Area: " << area() << endl;
-        cout << "Perimeter: " << perimeter() << endl;
-    }
+private:
+    double radius_;
 };
 
 class Rectangle : public Shape {
-private:
-    double length;
-    double width;
-
 public:
-    Rectangle(double l, double w) {
-        length = l;
-        width = w;
+    Rectangle(double width, double height) : width_(width), height_(height) {
+        if (!std::isfinite(width_) || !std::isfinite(height_) ||
+            width_ <= 0.0 || height_ <= 0.0) {
+            throw std::invalid_argument("Rectangle dimensions must be positive.");
+        }
     }
 
-    double area() const override {
-        return length * width;
+    double area() const override { return width_ * height_; }
+    double perimeter() const override { return 2.0 * (width_ + height_); }
+    void print(std::ostream& out) const override {
+        out << "Rectangle(width=" << width_ << ", height=" << height_
+            << ", area=" << area() << ", perimeter=" << perimeter() << ')';
     }
 
-    double perimeter() const override {
-        return 2 * (length + width);
-    }
-
-    void display() const override {
-        cout << "Rectangle" << endl;
-        cout << "Area: " << area() << endl;
-        cout << "Perimeter: " << perimeter() << endl;
-    }
+private:
+    double width_;
+    double height_;
 };
 
 class Triangle : public Shape {
-private:
-    double a;
-    double b;
-    double c;
-
 public:
-    Triangle(double side1, double side2, double side3) {
-        a = side1;
-        b = side2;
-        c = side3;
+    Triangle(double a, double b, double c) : a_(a), b_(b), c_(c) {
+        if (!std::isfinite(a_) || !std::isfinite(b_) || !std::isfinite(c_) ||
+            a_ <= 0.0 || b_ <= 0.0 || c_ <= 0.0 ||
+            a_ + b_ <= c_ || a_ + c_ <= b_ || b_ + c_ <= a_) {
+            throw std::invalid_argument("The side lengths do not form a valid triangle.");
+        }
     }
 
-    double perimeter() const override {
-        return a + b + c;
-    }
-
+    double perimeter() const override { return a_ + b_ + c_; }
     double area() const override {
-        double p = perimeter() / 2;
-
-        return sqrt(p * (p - a) * (p - b) * (p - c));
+        const double semiPerimeter = perimeter() / 2.0;
+        return std::sqrt(semiPerimeter * (semiPerimeter - a_) *
+                         (semiPerimeter - b_) * (semiPerimeter - c_));
+    }
+    void print(std::ostream& out) const override {
+        out << "Triangle(sides=" << a_ << ", " << b_ << ", " << c_
+            << ", area=" << area() << ", perimeter=" << perimeter() << ')';
     }
 
-    void display() const override {
-        cout << "Triangle" << endl;
-        cout << "Area: " << area() << endl;
-        cout << "Perimeter: " << perimeter() << endl;
-    }
+private:
+    double a_;
+    double b_;
+    double c_;
 };
 
 int main() {
-    Circle circle(5);
-    Rectangle rectangle(4, 6);
-    Triangle triangle(3, 4, 5);
+    std::vector<std::unique_ptr<Shape>> shapes;
+    shapes.push_back(std::make_unique<Circle>(5.0));
+    shapes.push_back(std::make_unique<Rectangle>(4.0, 6.0));
+    shapes.push_back(std::make_unique<Triangle>(3.0, 4.0, 5.0));
 
-    Shape* shapes[3];
-
-    shapes[0] = &circle;
-    shapes[1] = &rectangle;
-    shapes[2] = &triangle;
-
-    double totalArea = 0;
-
-    for (int i = 0; i < 3; i++) {
-        shapes[i]->display();
-
-        totalArea += shapes[i]->area();
-
-        cout << endl;
+    double totalArea = 0.0;
+    for (const auto& shape : shapes) {
+        std::cout << *shape << '\n';
+        totalArea += shape->area();
     }
-
-    cout << "Total area: " << totalArea << endl;
-
-    return 0;
+    std::cout << "Total area: " << totalArea << '\n';
 }

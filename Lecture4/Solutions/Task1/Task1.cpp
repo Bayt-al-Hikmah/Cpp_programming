@@ -1,19 +1,26 @@
 #include <iostream>
-using namespace std;
+#include <limits>
+#include <string>
 
-int dec2bin(int n);
-
-int main(){
-    int d;
-    cout << "Enter number : ";
-    cin >> d;
-    cout << dec2bin(d) << endl;
-    return 0;
+std::string toBinary(unsigned int value) {
+    if (value < 2) {
+        return std::to_string(value);
+    }
+    return toBinary(value / 2) + std::to_string(value % 2);
 }
 
-int dec2bin(int n){
-    if (n == 0){
-        return 0;
+int main() {
+    long long input{};
+    std::cout << "Enter a non-negative integer: ";
+    if (!(std::cin >> input) || input < 0) {
+        std::cerr << "Please enter a non-negative integer.\n";
+        return 1;
     }
-    return n % 2 + 10 * dec2bin(n / 2);
+    if (static_cast<unsigned long long>(input) >
+        static_cast<unsigned long long>(std::numeric_limits<unsigned int>::max())) {
+        std::cerr << "The value is too large for this example.\n";
+        return 1;
+    }
+
+    std::cout << "Binary: " << toBinary(static_cast<unsigned int>(input)) << '\n';
 }

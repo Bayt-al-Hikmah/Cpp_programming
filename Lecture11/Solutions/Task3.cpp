@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <cmath>
 #include <type_traits>
 #include <limits>
 
@@ -23,9 +24,6 @@ int main() {
         {104, 8, 75.25},
         {105, 15, 40.00}
     };
-
-    const std::size_t count =
-        sizeof(products) / sizeof(products[0]);
 
     // Write products to the binary file
     std::ofstream outFile(

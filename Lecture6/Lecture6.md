@@ -1,34 +1,31 @@
-## Objectives :
-- **Enumerations, Structures, and Type Aliases:** Define and use `enum`, `enum class`, `struct`, `typedef`, and `using` to organize and represent data.
-- **Error Handling:** Identify common types of errors and handle exceptions using `try`, `throw`, `catch`, standard exceptions, and custom exceptions.
-- **Exception Safety and Resource Management:** Understand stack unwinding, RAII, and exception safety guarantees.
-- **Assertions:** Use `assert()` and `static_assert` to verify runtime assumptions and compile-time requirements.
-- **Modern Error Handling:** Use error codes, `std::optional`, and C++23 `std::expected` to represent and handle failures.
+# Enumerations, Structures, and Error Handling
 
-## Enum, Structs and Type Aliases
+## Learning Objectives
+- Represent named states with enumerations and group related data with structures.
+- Choose between `struct` and `class` based on the required interface and encapsulation.
+- Recognize compile-time, runtime, and logic errors.
+- Handle failures with exceptions, assertions, `std::optional`, and  `std::expected`.
+
+## Enumerations, Structures, and Type Aliases
 In the previous lecture, we learned how to create our own types using classes. We saw how a class groups data and functions into a single unit, allowing us to represent real-world entities such as students, cars, and other objects. We also explored how constructors initialize objects, how encapsulation protects their data, and how inheritance and polymorphism help us build more flexible programs.
 
 However, classes are not the only way to define our own types in C++. Sometimes, we simply need to represent a value chosen from a predefined set of possibilities. In other situations, we want to group a few related values together without necessarily needing all the features of a class.
 
 C++ provides several features for these situations. In this lecture, we will explore **enumerations**, **structures**, and **type aliases**, and learn when each one is useful.
 ### Enumerations
-So far, we have worked with variables that store values of different data types, such as integers, characters, and strings.
+Let's suppose we want to create program that help use to make decision based on coin flip, a coin has two possible sides: heads or tails. to build this we need variable that represent **one value from a predefined set of possibilities**.
 
-Sometimes, however, a variable should represent **one value from a predefined set of possibilities**.
-
-For example, a coin has two possible sides: heads or tails. A traffic light can be red, yellow, or green. Similarly, a program might have three states: running, paused, or stopped.
-
-We could represent these states using integers. For example, `0` could mean running, `1` could mean paused, and `2` could mean stopped.
+We could represent these states using integers. For example, `0` could mean head, `1` could mean tails.
 
 But consider the following code:
 ```cpp
-int state = 1;
+int coin = 1;
 ```
 What does `1` represent? We cannot tell without remembering what each integer means.
 
 We could use strings instead, but that introduces other problems, such as spelling mistakes and unnecessary comparisons.
 
-C++ provides a better solution: **enumerations**, declared using the `enum` keyword. An enumeration defines a type whose values represent a fixed set of named possibilities.
+C++ provides a better solution: **enumerations**. An enumeration defines a type whose values represent a fixed set of named possibilities.
 #### Defining an Enumeration
 To define an enumeration, we use the `enum` keyword, followed by the enumeration's name and a list of enumerators enclosed in curly braces `{}`.  
 ```cpp  
@@ -139,11 +136,7 @@ int main() {
 	
 	return 0;  
 }  
-```  
-Output:
-```  
-You won!  
-```  
+```
 #### Scoped Enumerations: `enum class`
 Although ordinary enumerations are useful, they have some limitations.
 
@@ -207,7 +200,7 @@ return 0;
 }  
 ```  
 The important difference is that we must qualify the enumerators with their enumeration names:  
-```  
+```cpp
 Coin::Heads  
 ```  
 We can also use scoped enumerations with `switch` statements.  
@@ -240,11 +233,6 @@ int main() {
 	return 0;  
 }  
 ```  
-Output:
-```  
-Prepare to stop  
-```  
-Scoped enumerations are generally a good choice in modern C++ because they keep enumerator names organized and prevent implicit conversion to integers.  
 #### Underlying Types
 An enumeration has an underlying type, which is the integer type used to represent its values.
 
@@ -259,7 +247,7 @@ East,
 West  
 };  
 ```  
-Here, `Direction` uses `unsigned char` as its underlying type. this means the enumeration's values are represented using an integer type that typically occupies one byte.
+Here, `Direction` uses `unsigned char` as its underlying type. 
 
 We can also specify an underlying type for an ordinary enumeration.  
 ```cpp  
@@ -269,8 +257,6 @@ Warning = 1,
 Error = 2  
 };  
 ```  
-Specifying an underlying type can be useful when working with binary data, hardware registers, file formats, or interfaces that require a particular integer representation.
-
 We can retrieve an enumerator's underlying value using `static_cast`.  
 ```cpp  
 #include <iostream>
@@ -292,18 +278,8 @@ int main() {
 	return 0;  
 }  
 ```  
-**Output:**  
-```  
-2  
-```  
 We convert the value to `unsigned char` to obtain its underlying representation. We then convert it to `int` for printing because a character type is typically printed as a character rather than as a number.
 ### Structures
-In the previous lecture, we learned that a class allows us to group data and functions into a single type. We can define member variables to represent an object's properties and member functions to describe its behavior.
-
-For example, a `Student` class might contain a name, an age, and a function that displays the student's information.
-
-However, not every type needs the full structure of an object-oriented design. Sometimes, we simply want to group related values into one logical unit.
-
 Imagine that we need to store information about a student. Each student has a name, an age, a student ID, and a grade.
 
 These values describe the same entity, but they have different data types.
@@ -362,13 +338,6 @@ int main() {
 ```
 The variable `student1` is an object of type `Student`. To access one of its members, we use the **member access operator**, represented by a dot `.`.
 
-For example:
-```cpp
-student1.name = "Ali";
-student1.age = 23;
-```
-The expression `student1.name` refers to the `name` member of `student1`, while `student1.age` refers to its `age` member.
-
 We can create another student in exactly the same way:
 ```cpp
 Student student2;
@@ -379,8 +348,6 @@ student2.studentID = 1002;
 student2.grade = 18.0;
 ```
 Although both variables have the same type, each object maintains its own member values.
-
-This should feel familiar from our previous lecture: just as two objects of the same class can hold different data, two objects of the same structure can hold different data.
 #### Structures and Classes: What's the Difference?
 Before going further, let's connect structures directly to what we learned about classes.
 
@@ -409,20 +376,13 @@ student.name = "Ali";
 ```
 However, direct access to the members of `StudentRecord` is not allowed because those members are private. We would need to provide public member functions, such as setters and getters, to access them from outside the class.
 
-The same distinction applies to inheritance: a structure uses `public` inheritance by default, while a class uses `private` inheritance by default.
-
-Apart from these defaults, the two constructs support the same fundamental language features.
-
-So, when should we use each one?
-
-A common convention is to use `struct` for types that primarily group related data, especially when direct access to their members is appropriate. We often use `class` when we want to enforce encapsulation and define an interface through which an object is used.
+The same distinction applies to inheritance: a structure uses `public` inheritance by default, while a class uses `private` inheritance by default..
 #### Initialization of Structures
 In our previous example, we created a `Student` object and assigned values to its members afterward.
 
 C++ also allows us to initialize a structure when creating an object.
 
 Consider the following definition:
-
 ```cpp
 struct Student {
     std::string name;
@@ -436,12 +396,6 @@ Student student1{"Ali", 23};
 The values are assigned to the members in the order in which they are declared.
 
 In this example, `"Ali"` initializes `name`, and `23` initializes `age`.
-
-We can create another object with different values:
-```cpp
-Student student2{"Sara", 21};
-```
-This approach is more concise and makes it clear which values belong to each object.
 #### Default Member Initializers
 Sometimes, we want members to have sensible default values when an object is created without explicit initial values.
 
@@ -463,7 +417,6 @@ We can still override these defaults when creating an object:
 Student student2{"Ali", 23};
 ```
 Here, `student2` has the name `"Ali"` and age `23`.
-
 ### Designated Initializers
 When a structure contains many members, initializing it by position can become difficult to read.
 
@@ -497,9 +450,7 @@ There is one important restriction: in C++, designated initializers must follow 
 
 For example, if `name` is declared before `age`, then `.name` must appear before `.age`.
 #### Nested Structures
-So far, our `Student` structure has contained only simple values. But a structure can also contain members of other user-defined types.
-
-This is useful when an entity contains smaller objects that have their own properties.
+Our `Student` structure has contained only simple values. But a structure can also contain members of other user-defined types.
 
 For example, a student may have an address consisting of a city and a street.
 
@@ -528,8 +479,6 @@ Student student1{
     {"Algiers", "Didouche Mourad"}
 };
 ```
-The first two values initialize `name` and `age`. The nested braces initialize the `Address` object.
-
 We can then access the nested members using the dot operator:
 ```cpp
 #include <iostream>
@@ -560,64 +509,11 @@ int main() {
     return 0;
 }
 ```
-**Output:**
-```
-Name: Ali
-City: Algiers
-Street: Didouche Mourad
-```
 Consider the expression:
 ```
 student1.address.city
 ```
 We first access the `address` member of `student1`. Then, we access the `city` member of that address.
-
-This illustrates an important idea: we can build more complex data structures by combining smaller, well-defined types.
-
-A structure can contain members of many types, including fundamental types, arrays, enumerations, other structures, standard library types such as `std::string`, and pointers.
-
-Let's combine two concepts from this lecture by using an enumeration inside a structure.
-```cpp
-#include <iostream>
-#include <string>
-
-enum class Grade {
-    Excellent,
-    Good,
-    Average,
-    Poor
-};
-
-struct Student {
-    std::string name;
-    int age;
-    Grade grade;
-};
-
-int main() {
-    Student student1{
-        "Ali",
-        23,
-        Grade::Excellent
-    };
-
-    std::cout << "Name: " << student1.name << '\n';
-    std::cout << "Age: " << student1.age << '\n';
-
-    if (student1.grade == Grade::Excellent) {
-        std::cout << "Excellent student!\n";
-    }
-
-    return 0;
-}
-```
-**Output:**
-```
-Name: Ali
-Age: 23
-Excellent student!
-```
-Notice how `Grade` restricts the intended meaning of the `grade` member to a set of named values. Instead of storing an arbitrary integer or a string such as `"Excellent"`, we use an enumeration to represent the available categories.
 #### Pointers to Structures
 We have already studied pointers and object addresses. The same principles apply to structures because a structure defines an ordinary object type.
 
@@ -662,23 +558,8 @@ These expressions are equivalent to:
 (*ptr).name
 (*ptr).age
 ```
-The arrow operator is simply a convenient way to dereference a pointer and access one of the object's members. This is the same operator we use when accessing members of class objects through pointers.
-
-One important point: `ptr` does not contain a separate copy of the student. It refers to the existing `student1` object. Therefore, changing a member through the pointer changes the original object.
-
-For example:
-```cpp
-ptr->age = 24;
-
-std::cout << student1.age << '\n';
-```
-The output is:
-```
-24
-```
-Both expressions refer to the same member of the same object.
 #### Dynamically Allocating a Structure
-We can also create a structure object dynamically using `new`, just as we can dynamically allocate an object of a class.
+We can also create a structure object dynamically using `new`, just as we can dynamically allocate other objects.
 ```cpp
 #include <iostream>
 #include <string>
@@ -700,7 +581,7 @@ int main() {
 }
 ```
 The expression:
-```
+```cpp
 new Student{"Ali", 23}
 ```
 dynamically creates a `Student` object and initializes its members. The returned pointer stores the address of that object.
@@ -709,31 +590,6 @@ After we finish using it, we release the dynamically allocated object with:
 ```cpp
 delete student1;
 ```
-This is the same memory-management principle we discussed when working with pointers and dynamically allocated objects.
-
-In modern C++, however, we generally prefer automatic storage or standard library types such as `std::unique_ptr` when dynamic allocation is necessary. They help manage object lifetimes and reduce the risk of memory leaks.
-
-For example, we could write:
-
-```cpp
-#include <iostream>
-#include <memory>
-#include <string>
-
-struct Student {
-    std::string name;
-    int age;
-};
-
-int main() {
-    auto student1 = std::make_unique<Student>(Student{"Ali", 23});
-
-    std::cout << student1->name << '\n';
-
-    return 0;
-}
-```
-Here, `std::unique_ptr` manages the dynamically allocated object. When the pointer goes out of scope, the object is automatically destroyed.
 ### `typedef` and `using`
 We have now seen how enumerations define named values and how structures group related data into a single type.
 
@@ -763,39 +619,7 @@ int main() {
     return 0;
 }
 ```
-**Output:**
-```
-100
-```
 The important point is that `UInt` and `unsigned int` refer to the same type. We have not defined a new type with different behavior; we have simply introduced another name for an existing one.
-
-We can also use `typedef` with structures.
-
-For example:
-```cpp
-#include <string>
-
-typedef struct {
-    std::string name;
-    int age;
-} Student;
-```
-This defines an unnamed structure and introduces `Student` as an alias for its type.
-
-We can then create objects using:
-```cpp
-Student student1{"Ali", 23};
-```
-However, this pattern is generally unnecessary in C++. Unlike C, C++ allows us to use the name of a structure directly as a type name. We can simply write:
-```cpp
-struct Student {
-    std::string name;
-    int age;
-};
-
-Student student1{"Ali", 23};
-```
-There is no need to use `typedef` just to avoid writing `struct` before the type name.
 #### Using `using` to Create Type Aliases
 Modern C++ provides the `using` keyword as an alternative to `typedef`.
 
@@ -817,51 +641,7 @@ int main() {
     return 0;
 }
 ```
-The output is still:
-```
-100
-```
-So why do we have two different ways to create the same kind of alias?
-
 The main advantage of `using` is readability. Its syntax makes the relationship between the new name and the existing type easier to recognize.
-
-Compare:
-```cpp
-typedef unsigned int UInt;
-```
-with:
-```cpp
-using UInt = unsigned int;
-```
-The second form reads naturally as "UInt is an alias for unsigned int."
-
-We can also use `using` with structures that have already been defined.
-```cpp
-#include <iostream>
-#include <string>
-
-struct Student {
-    std::string name;
-    int age;
-};
-
-using StudentRecord = Student;
-
-int main() {
-    StudentRecord student1{"Ali", 23};
-
-    std::cout << student1.name << '\n';
-    std::cout << student1.age << '\n';
-
-    return 0;
-}
-```
-Here, `StudentRecord` is another name for `Student`. We did not create a new structure or a new type. We simply introduced an alternative name.
-
-This is particularly useful when the alias describes how a type is used in a particular part of a program.
-
-For example, a project might use `StudentRecord` when referring to a student's stored information, even though the underlying type is `Student`.
-
 #### Type Aliases for Pointers and More Complex Types
 Type aliases become particularly useful when the original type is long or difficult to read.
 
@@ -887,9 +667,39 @@ StudentPtr studentPtr;
 Both declarations mean the same thing: `studentPtr` is a pointer to a `Student` object.
 
 Type aliases can also be useful for more complex types, including function pointers, container types, and template specializations. We will encounter these situations as our programs become more advanced.
+```c++
+#include <iostream>
 
+using Operation = int (*)(int, int);
 
-## Handling Errors 
+int add(int a, int b){
+    return a + b;
+}
+
+int multiply(int a, int b){
+    return a * b;
+}
+
+int main(){
+    Operation op = add;
+
+    std::cout << op(5, 3) << std::endl;
+
+    op = multiply;
+
+    std::cout << op(5, 3) << std::endl;
+
+    return 0;
+}
+```
+In this example, we use `using` to create an alias called `Operation` for a function pointer that takes two integers as arguments and returns an integer.
+
+We then declare two functions, `add()` and `multiply()`, which perform addition and multiplication, respectively.
+
+Inside `main()`, we declare a function pointer `op` of type `Operation` and assign it to `add`. When we call `op(5, 3)`, it executes `add(5, 3)` and returns `8`.
+
+Next, we assign `multiply` to the same pointer. Now, calling `op(5, 3)` executes `multiply(5, 3)` and returns `15`.
+## Handling Errors
 ### Introduction
 When we write programs, we usually focus on what the program should do: calculate a result, process some data, communicate with a device, or interact with a user. However, a program must also deal with situations in which something goes wrong. The user might enter an invalid value, a file might not exist, a resource might be unavailable, or a calculation might receive unexpected input.
 
@@ -1000,12 +810,6 @@ int main() {
 }
 ```
 The `divide` function is responsible for enforcing its own precondition. It does not decide how the entire application should react to the failure; it reports the problem by throwing an exception. The caller decides how to handle it.
-
-The example also demonstrates why exception handlers should generally catch standard exceptions by **`const` reference**.
-```cpp
-catch (const std::exception& e)
-```
-Passing by reference avoids copying the exception object and allows the handler to access the original object. The `const` qualifier communicates that the handler will not modify the exception.
 ### Creating Custom Exceptions
 Standard exceptions cover many common errors, but sometimes an application needs more descriptive error types. For example, in a scientific application, we might want to report division by zero using a specific exception named `DivisionByZeroError` rather than a general exception such as `std::invalid_argument`.
 
@@ -1060,7 +864,6 @@ explicit DivisionByZeroError(std::string msg)
 ```
 The `std::move` operation allows the string to be moved into `message` when possible, avoiding an unnecessary copy. It requires the `<utility>` library to be included. The `explicit` keyword prevents unintended implicit conversions from a string to a `DivisionByZeroError`.
 
-
 The most important function is `what()`:
 ```cpp
 const char* what() const noexcept override {
@@ -1068,7 +871,6 @@ const char* what() const noexcept override {
 }
 ```
 This function provides the error message through the standard exception interface. Its declaration contains several important elements:
-
 - **`const char*`** specifies that the function returns a pointer to constant characters, matching the return type required by `std::exception::what()`.
 - **`const`** after the parameter list means the function does not modify the exception object's state.
 - **`noexcept`** guarantees that the function will not allow an exception to escape, matching the base class's contract.
@@ -1116,11 +918,7 @@ int main() {
 ```
 When `main()` calls `first()`, which calls `second()`, which calls `third()`, the program runs normally until an exception is thrown. At that point, the remaining statements in these functions are skipped, and C++ searches for a matching `catch` block, moving back through the function calls.
 
-As the exception moves outward, local objects are destroyed as their scopes are exited. This process is called **stack unwinding**. In our example, the exception eventually reaches the `catch` block in `main()`, where it is handled.
-
-Stack unwinding also explains why exceptions work well with automatic resource cleanup. However, if no matching handler is found, the program terminates. Similarly, if a destructor throws an exception during stack unwinding, `std::terminate` is called. For this reason, destructors should generally not allow exceptions to escape.
-
-This brings us to an important concept in modern C++: **RAII**, which helps manage resources safely through object lifetimes and destructors.
+As the exception moves outward, local objects are destroyed as their scopes are exited. This process is called **stack unwinding**. 
 ### RAII and Exceptions
 Imagine that a function opens a file, acquires a mutex, or allocates a resource that must eventually be released. If the function exits normally, we can release the resource at the end. But what happens if an exception is thrown before execution reaches that cleanup code?
 
@@ -1180,8 +978,6 @@ To prevent such problems, C++ defines three common levels of exception safety: t
 The basic guarantee means that after an exception, objects remain in a valid state and resources are not leaked. However, their values may have changed.
 
 Consider a function that processes several values and updates a container one element at a time. If processing the fourth element fails, the first three elements might already have been updated. Under the basic guarantee, those changes are allowed, provided the container and all involved objects remain valid.
-
-This guarantee is often sufficient when partial progress is acceptable and the caller can continue using the affected objects safely.
 #### The Strong Guarantee
 The strong guarantee goes further: if an operation fails, the program state covered by the guarantee remains unchanged. The operation either succeeds or has no effect.
 
@@ -1201,8 +997,6 @@ void update_name(std::string& name, std::string new_name) {
 }
 ```
 The function first checks the new name. If it is empty, an exception is thrown, and the original name remains unchanged. Otherwise, the function swaps the strings to apply the update.
-
-This provides the strong guarantee for the validation failure shown here. The approach is useful when partial changes could cause problems, although it may require extra memory or computation.
 #### The No-Throw Guarantee
 The no-throw guarantee means that a function will not allow an exception to escape.
 
@@ -1213,8 +1007,6 @@ void cleanup() noexcept {
 }
 ```
 However, `noexcept` is a contract, not a way to handle errors. If an exception escapes from a `noexcept` function, C++ calls `std::terminate`.
-
-For this reason, we should use `noexcept` only when the function can honor that guarantee.
 ### Assertions:
 Exceptions help us respond to failures that may occur during normal program execution. Assertions serve a different purpose: they help us verify assumptions that should already be true if the program is correct.
 
@@ -1230,10 +1022,10 @@ double square_root_input(double value) {
     return value;
 }
 ```
-If assertions are enabled and the condition evaluates to `false`, the assertion reports a failure and terminates the program. This helps us identify a violated assumption close to where it occurs.
+If assertions are enabled and the condition evaluates to `false`, the assertion reports a failure and terminates the program. 
 
 However, assertions are not a substitute for validating user input. They can be disabled when `NDEBUG` is defined, so a program must not depend on an assertion to enforce a requirement that must always be checked.
-#### Runtime Assertions and `static_assert`
+#### Compile time Assertions
 The `assert()` macro checks a condition at runtime. C++ also provides `static_assert`, which checks a condition at compile time.
 ```cpp
 #include <iostream>
@@ -1247,8 +1039,6 @@ int main() {
 }
 ```
 Unlike `assert()`, `static_assert` does not wait for the program to execute. The compiler checks the condition when it can evaluate it, and a failed assertion prevents successful compilation of the relevant code.
-
-This makes `static_assert` useful for verifying type requirements, platform assumptions, and compile-time constants.
 ### Handling Failures Without Exceptions
 Exceptions are not the only way to report errors. In many systems, a function returns a status value indicating whether an operation succeeded.
 
@@ -1287,16 +1077,10 @@ enum class DivideError {
 };
 ```
 A function can return one of these values, or use a result structure containing both a status and the calculated result.
-
-Error codes are common in embedded systems, operating systems, networking libraries, and low-level APIs. They allow callers to handle expected failures explicitly without relying on exception propagation.
-
-They also have trade-offs. Every caller must check the returned status, and errors can be accidentally ignored. As the number of possible failures grows, the return type must be designed carefully so that the caller can distinguish them.
 #### When a Value Might Not Exist `std::optional`:
 Sometimes an operation does not fail in the sense of an exceptional event. Instead, it simply might not produce a value.
 
 Imagine a function that searches for a sensor by its identifier. If the sensor exists, the function returns it. If the sensor is not registered, there is no result to return.
-
-We could use a pointer or a special value to represent the missing sensor, but these approaches can be ambiguous. A special value might also be a valid result, and a pointer introduces questions about ownership and lifetime.
 
 C++17 introduced `std::optional` to represent a value that may or may not exist.
 ```cpp
@@ -1330,7 +1114,6 @@ if (sensor) {
     std::cout << *sensor << '\n';
 }
 ```
-The dereference operator `*` accesses the contained value. It should only be used when the optional contains a value. Calling `.value()` is another option; unlike unchecked dereferencing, `.value()` throws `std::bad_optional_access` if the optional is empty.
 #### Returning Either a Value or an Error with `std::expected`
 Sometimes, a function can fail for different reasons. For example, when reading a sensor, the sensor might be unavailable or return invalid data. Using `std::optional` tells us whether a value exists, but it does not explain why the operation failed.
 
@@ -1364,10 +1147,6 @@ int main() {
 If the division succeeds, the function returns the result. If the divisor is zero, it returns an error instead.
 
 The expression `std::unexpected(...)` explicitly constructs the error alternative. The caller can test the result with `if (result)`, access the successful value using `*result`, or retrieve the error using `result.error()` when the result contains an error.
-
-Unlike `std::optional`, which only indicates whether a value exists, **`std::expected` also tells us why an operation failed**. It allows callers to handle errors explicitly without relying on exceptions for expected failures.
-
-Use `std::expected` when a function can fail for known reasons and the caller needs to know what went wrong. It is useful for operations such as parsing, validation, and reading configuration files.
 ## Tasks
 ### Task 1:
 Write a program in C++ to represent a collection of students. Each student should have the following details:

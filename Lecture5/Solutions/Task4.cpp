@@ -1,208 +1,165 @@
+#include <algorithm>
+#include <cstddef>
 #include <iostream>
+#include <stdexcept>
 #include <string>
-using namespace std;
+#include <utility>
+#include <vector>
 
 namespace University {
 
-    class Person {
-    protected:
-        string name;
-        int age;
-
-    public:
-        Person(string n, int a) {
-            name = n;
-            age = a;
+class Person {
+public:
+    Person(std::string name, int age) : name_(std::move(name)), age_(age) {
+        if (name_.empty() || age_ < 0) {
+            throw std::invalid_argument("Invalid person details.");
         }
-
-        virtual void display() const {
-            cout << "Name: " << name << endl;
-            cout << "Age: " << age << endl;
-        }
-
-        virtual ~Person() {
-        }
-    };
-
-    class Student : public Person {
-    private:
-        int studentID;
-        double grade1;
-        double grade2;
-        double grade3;
-
-        static int studentCount;
-
-    public:
-        Student(string n, int a, int id,
-                double g1, double g2, double g3)
-            : Person(n, a) {
-
-            studentID = id;
-            grade1 = g1;
-            grade2 = g2;
-            grade3 = g3;
-
-            studentCount++;
-        }
-
-        // Copy constructor
-        Student(const Student &other)
-            : Person(other.name, other.age) {
-
-            studentID = other.studentID;
-            grade1 = other.grade1;
-            grade2 = other.grade2;
-            grade3 = other.grade3;
-
-            studentCount++;
-        }
-
-        // Assignment operator
-        Student& operator=(const Student &other) {
-            if (this != &other) {
-                name = other.name;
-                age = other.age;
-                studentID = other.studentID;
-                grade1 = other.grade1;
-                grade2 = other.grade2;
-                grade3 = other.grade3;
-            }
-
-            return *this;
-        }
-
-        ~Student() override {
-            studentCount--;
-        }
-
-        double average() const {
-            return (grade1 + grade2 + grade3) / 3;
-        }
-
-        int getStudentID() const {
-            return studentID;
-        }
-
-        static int getStudentCount() {
-            return studentCount;
-        }
-
-        void display() const override {
-            Person::display();
-
-            cout << "Student ID: " << studentID << endl;
-            cout << "Average: " << average() << endl;
-        }
-
-        bool operator==(const Student &other) const {
-            return studentID == other.studentID;
-        }
-
-        bool operator<(const Student &other) const {
-            return average() < other.average();
-        }
-
-        friend ostream& operator<<(ostream &out,
-                                   const Student &student) {
-            out << "Name: " << student.name << endl;
-            out << "Student ID: " << student.studentID << endl;
-            out << "Average: " << student.average();
-
-            return out;
-        }
-    };
-
-    int Student::studentCount = 0;
-
-    class StudentManager {
-    private:
-        Student* students[10];
-        int count;
-
-    public:
-        StudentManager() {
-            count = 0;
-        }
-
-        void addStudent(Student* student) {
-            if (count < 10) {
-                students[count] = student;
-                count++;
-            }
-        }
-
-        void displayAll() const {
-            for (int i = 0; i < count; i++) {
-                students[i]->display();
-                cout << endl;
-            }
-        }
-
-        Student* findStudent(int id) const {
-            for (int i = 0; i < count; i++) {
-                if (students[i]->getStudentID() == id) {
-                    return students[i];
-                }
-            }
-
-            return nullptr;
-        }
-
-        void displayBestStudent() const {
-            if (count == 0) {
-                cout << "No students available." << endl;
-                return;
-            }
-
-            Student* best = students[0];
-
-            for (int i = 1; i < count; i++) {
-                if (*best < *students[i]) {
-                    best = students[i];
-                }
-            }
-
-            cout << "Best student:" << endl;
-            best->display();
-        }
-    };
-
-}
-
-using namespace University;
-
-int main() {
-    Student student1("Ali", 20, 101, 16, 18, 14);
-    Student student2("Sara", 21, 102, 19, 18, 20);
-    Student student3("Amine", 19, 103, 12, 15, 14);
-
-    StudentManager manager;
-
-    manager.addStudent(&student1);
-    manager.addStudent(&student2);
-    manager.addStudent(&student3);
-
-    cout << "All students:" << endl;
-    manager.displayAll();
-
-    cout << "Searching for student 102:" << endl;
-
-    Student* found = manager.findStudent(102);
-
-    if (found != nullptr) {
-        cout << *found << endl;
-    } else {
-        cout << "Student not found." << endl;
     }
 
-    cout << endl;
+    virtual void display(std::ostream& out) const {
+        out << "Name: " << name_ << "\nAge: " << age_;
+    }
+    virtual ~Person() = default;
 
-    manager.displayBestStudent();
+protected:
+    std::string name_;
+    int age_;
+};
 
-    cout << endl;
-    cout << "Number of Student objects: "
-         << Student::getStudentCount() << endl;
+class Student : public Person {
+public:
+    Student(std::string name, int age, int id)
+        : Person(std::move(name), age), id_(id) {
+        if (id_ <= 0) {
+            throw std::invalid_argument("Student ID must be positive.");
+        }
+        ++liveCount_;
+    }
 
-    return 0;
+    Student(const Student& other)
+        : Person(other), id_(other.id_), grades_(other.grades_) {
+        ++liveCount_;
+    }
+
+    Student(Student&& other) noexcept
+        : Person(std::move(other)), id_(other.id_), grades_(std::move(other.grades_)) {
+        ++liveCount_;
+    }
+
+    Student& operator=(const Student&) = default;
+    Student& operator=(Student&&) noexcept = default;
+
+    ~Student() override { --liveCount_; }
+
+    void addGrade(double grade) {
+        if (grade < 0.0 || grade > 20.0) {
+            throw std::invalid_argument("A grade must be between 0 and 20.");
+        }
+        grades_.push_back(grade);
+    }
+
+    double average() const {
+        if (grades_.empty()) {
+            return 0.0;
+        }
+        double total = 0.0;
+        for (double grade : grades_) {
+            total += grade;
+        }
+        return total / static_cast<double>(grades_.size());
+    }
+
+    int id() const { return id_; }
+
+    static std::size_t liveCount() { return liveCount_; }
+
+    bool operator==(const Student& other) const { return id_ == other.id_; }
+    bool operator<(const Student& other) const { return average() < other.average(); }
+
+    void display(std::ostream& out) const override {
+        Person::display(out);
+        out << "\nStudent ID: " << id_ << "\nGrades: ";
+        for (double grade : grades_) {
+            out << grade << ' ';
+        }
+        out << "\nAverage: " << average();
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const Student& student) {
+        student.display(out);
+        return out;
+    }
+
+private:
+    int id_;
+    std::vector<double> grades_;
+    inline static std::size_t liveCount_ = 0;
+};
+
+class StudentManager {
+public:
+    void addStudent(const Student& student) {
+        if (findStudent(student.id()) != nullptr) {
+            throw std::invalid_argument("A student with this ID already exists.");
+        }
+        students_.push_back(student);
+    }
+
+    bool removeStudent(int id) {
+        const auto oldSize = students_.size();
+        std::erase_if(students_, [id](const Student& student) {
+            return student.id() == id;
+        });
+        return students_.size() != oldSize;
+    }
+
+    Student* findStudent(int id) {
+        const auto it = std::find_if(students_.begin(), students_.end(),
+            [id](const Student& student) { return student.id() == id; });
+        return it == students_.end() ? nullptr : &*it;
+    }
+
+    const Student* findStudent(int id) const {
+        const auto it = std::find_if(students_.begin(), students_.end(),
+            [id](const Student& student) { return student.id() == id; });
+        return it == students_.end() ? nullptr : &*it;
+    }
+
+    void displayAll(std::ostream& out) const {
+        for (const Student& student : students_) {
+            out << student << "\n\n";
+        }
+    }
+
+private:
+    std::vector<Student> students_;
+};
+
+} // namespace University
+
+int main() {
+    using University::Student;
+    using University::StudentManager;
+
+    Student ali("Ali", 20, 101);
+    ali.addGrade(16);
+    ali.addGrade(18);
+    ali.addGrade(14);
+
+    Student sara("Sara", 21, 102);
+    sara.addGrade(19);
+    sara.addGrade(18);
+    sara.addGrade(20);
+
+    StudentManager manager;
+    manager.addStudent(ali);
+    manager.addStudent(sara);
+
+    manager.displayAll(std::cout);
+
+    if (const Student* found = manager.findStudent(102)) {
+        std::cout << "Found student:\n" << *found << '\n';
+    }
+
+    std::cout << "Live Student objects: " << Student::liveCount() << '\n';
 }

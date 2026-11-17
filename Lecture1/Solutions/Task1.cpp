@@ -1,16 +1,15 @@
 #include <iostream>
-using namespace std;
 
-#define PI 3.14
+int main() {
+    constexpr double pi = 3.14159265358979323846;
+    double radius{};
 
-int main(){
-    float s, r;
-    cout << "Enter circle radius : ";
-    cin >> r;
-    s = r * r * PI;
-    cout << "The surface of the circle is " << s << endl;
-    return 0;
+    std::cout << "Enter the circle radius: ";
+    if (!(std::cin >> radius) || radius < 0.0) {
+        std::cerr << "Please enter a non-negative number.\n";
+        return 1;
+    }
+
+    const double area = pi * radius * radius;
+    std::cout << "Circle area: " << area << '\n';
 }
-
-
-
